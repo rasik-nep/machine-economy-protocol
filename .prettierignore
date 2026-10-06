@@ -1,0 +1,13 @@
+.anchor/
+.pnpm-store/
+AGENTS.md
+build/
+coverage/
+dist/
+ledger/
+node_modules/
+pnpm-lock.yaml
+target/
+test-ledger/
+machine_economy_protocol_whitepaper_v0.1.md
+PROJECT_STEPS.local.md

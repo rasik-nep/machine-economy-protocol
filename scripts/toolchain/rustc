@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+if [ -n "${RUSTUP_TOOLCHAIN:-}" ]; then
+  exec rustup run "$RUSTUP_TOOLCHAIN" rustc "$@"
+fi
+
+exec /opt/homebrew/bin/rustc "$@"

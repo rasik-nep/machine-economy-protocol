@@ -1,0 +1,44 @@
+# Local planning files
+machine_economy_protocol_whitepaper_v0.1.md
+PROJECT_STEPS.local.md
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+target/
+dist/
+build/
+.next/
+.turbo/
+coverage/
+
+# Solana / Anchor generated artifacts
+.anchor/
+test-ledger/
+ledger/
+*.so
+*.dylib
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.json.key
+id.json
+*-keypair.json
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

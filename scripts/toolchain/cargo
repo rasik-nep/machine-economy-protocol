@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+if [ "$#" -gt 0 ]; then
+  case "$1" in
+    +*)
+      toolchain="${1#+}"
+      shift
+      exec rustup run "$toolchain" cargo "$@"
+      ;;
+  esac
+fi
+
+exec /opt/homebrew/bin/cargo "$@"
