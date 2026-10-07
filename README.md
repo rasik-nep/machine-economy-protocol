@@ -18,6 +18,7 @@ precedent, update memory, and make a changed second procurement decision.
 ```sh
 pnpm install
 pnpm run doctor
+pnpm run anchor:build
 pnpm run check
 ```
 
@@ -25,3 +26,18 @@ Localnet is the default development cluster. Devnet is reserved for final demo
 validation only.
 
 See [docs/commands.md](docs/commands.md) for the current command list.
+
+## Run the complete demo
+
+```sh
+pnpm run anchor:build
+pnpm run dev
+```
+
+Open <http://127.0.0.1:3000> and choose **Run full demo**. The live dashboard runs
+real localnet escrow, an agent subcontract, controlled failure, five-juror
+commit/reveal, precedent publication, memory checkpointing, and a second job
+that changes from Provider X to Provider Z.
+
+See [the end-to-end guide](docs/end-to-end-demo.md) for setup, API commands,
+Gemini summaries, testing, and the controlled-demo security boundary.

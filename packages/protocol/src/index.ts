@@ -1,5 +1,8 @@
 export const PROTOCOL_NAME = "Machine Economy Protocol";
 export const DEFAULT_CLUSTER = "localnet";
+export { rankComputeOffers, RESERVATION_RISK_BPS } from "./router.ts";
+export type { UtilityBreakdown, UtilityRouterInput } from "./router.ts";
+export { calculateAgentMarginLamports } from "./subcontract.ts";
 
 export type DemoLoopStage =
   | "foundation-registry"
@@ -29,6 +32,48 @@ export const MVP_DEMO_LOOP: readonly DemoLoopStage[] = [
 ] as const;
 
 export type HashHex = `sha256:${string}`;
+
+export type ReservationClass = "spot" | "reserved" | "dedicated";
+
+export type ProviderMarketRecord = {
+  readonly id: string;
+  readonly displayName: string;
+  readonly evidenceRoot: HashHex;
+  readonly hardwareTrustBps: number;
+  readonly executionTrustBps: number;
+  readonly breachCount: number;
+};
+
+export type ModelInstanceMarketRecord = {
+  readonly id: string;
+  readonly providerId: string;
+  readonly stockModelId: string;
+  readonly executionCommitment: HashHex;
+  readonly modelTrustBps: number;
+};
+
+export type ComputeOfferMarketRecord = {
+  readonly id: string;
+  readonly modelInstanceId: string;
+  readonly priceLamports: number;
+  readonly expectedLatencyMs: number;
+  readonly failureProbabilityBps: number;
+  readonly reservationClass: ReservationClass;
+};
+
+export type DemoContractTerms = {
+  readonly task: {
+    readonly kind: "evidence-summary" | "ocr-extraction";
+    readonly inputRoot: HashHex;
+  };
+  readonly verificationRule: {
+    readonly kind: "customer-attested-result-root";
+  };
+  readonly liabilityRule: {
+    readonly kind: "missed-deadline-provider-liability";
+    readonly limitLamports: number;
+  };
+};
 
 export type StockModelManifest = {
   readonly kind: "mep.stock-model.v1";

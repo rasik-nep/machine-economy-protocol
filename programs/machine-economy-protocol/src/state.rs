@@ -56,6 +56,7 @@ pub struct ProviderRecord {
 pub struct ComputeOffer {
     pub provider: Pubkey,
     pub model_instance: Pubkey,
+    pub offer_index: u64,
     pub price_lamports: u64,
     pub expected_latency_ms: u32,
     pub failure_probability_bps: u16,
@@ -67,10 +68,19 @@ pub struct ComputeOffer {
 #[derive(InitSpace)]
 pub struct WorkContract {
     pub customer_agent: Pubkey,
+    pub customer_owner: Pubkey,
     pub provider: Pubkey,
+    pub supplier_agent: Pubkey,
+    pub provider_authority: Pubkey,
+    pub compute_offer: Pubkey,
     pub parent_contract: Pubkey,
+    pub child_contract: Pubkey,
+    pub contract_index: u64,
     pub task_root: [u8; 32],
+    pub verification_rule_root: [u8; 32],
+    pub liability_rule_root: [u8; 32],
     pub result_root: [u8; 32],
+    pub price_lamports: u64,
     pub escrow_lamports: u64,
     pub deadline_slot: u64,
     pub status: ContractStatus,
@@ -92,6 +102,11 @@ pub enum ContractStatus {
 #[account]
 #[derive(InitSpace)]
 pub struct Dispute {
+    pub jurors: [Pubkey; 5],
+    pub commits: u8,
+    pub reveals: u8,
+    pub breach_votes: u8,
+    pub provider_breached: bool,
     pub work_contract: Pubkey,
     pub claimant: Pubkey,
     pub evidence_root: [u8; 32],

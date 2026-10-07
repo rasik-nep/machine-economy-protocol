@@ -28,7 +28,7 @@ export const STOCK_MODEL_MANIFESTS = [
       parameterCount: "demo-stub",
       contextWindowTokens: 4096
     },
-    capabilities: ["ocr", "receipt-extraction", "image-evidence"],
+    capabilities: ["ocr", "receipt-extraction", "image-evidence", "evidence-summary"],
     license: "demo-fixture"
   }
 ] as const satisfies readonly StockModelManifest[];

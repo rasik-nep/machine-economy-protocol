@@ -11,3 +11,7 @@ target/
 test-ledger/
 machine_economy_protocol_whitepaper_v0.1.md
 PROJECT_STEPS.local.md
+
+apps/web/public/app.js
+test-results/
+playwright-report/

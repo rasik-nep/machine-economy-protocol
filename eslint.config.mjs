@@ -18,8 +18,20 @@ export default tseslint.config(
     languageOptions: {
       globals: {
         console: "readonly",
-        process: "readonly"
+        process: "readonly",
+        fetch: "readonly",
+        AbortSignal: "readonly",
+        setTimeout: "readonly"
       }
+    }
+  },
+  {
+    files: ["apps/web/src/dashboard.ts"],
+    rules: {
+      "@typescript-eslint/restrict-template-expressions": [
+        "error",
+        { allowNumber: true, allowNullish: true }
+      ]
     }
   },
   {
@@ -29,6 +41,9 @@ export default tseslint.config(
       "build/",
       "coverage/",
       "dist/",
+      "apps/web/public/app.js",
+      "test-results/",
+      "playwright-report/",
       "ledger/",
       "node_modules/",
       "target/",

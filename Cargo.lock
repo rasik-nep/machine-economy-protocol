@@ -1745,6 +1745,7 @@ dependencies = [
  "solana-instruction-error",
  "solana-keypair",
  "solana-message",
+ "solana-sha256-hasher",
  "solana-signer",
  "solana-transaction",
  "solana-transaction-error",

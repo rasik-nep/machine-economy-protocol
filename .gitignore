@@ -42,3 +42,8 @@ yarn-error.log*
 .DS_Store
 .idea/
 .vscode/
+
+# Generated dashboard bundle and browser reports
+apps/web/public/app.js
+test-results/
+playwright-report/

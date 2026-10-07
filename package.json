@@ -17,17 +17,31 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
+    "market:build": "node scripts/build-market.mjs",
+    "contract:build": "node scripts/build-contract.mjs",
+    "subcontract:build": "node scripts/build-subcontract.mjs",
     "localnet:start": "solana-test-validator --reset",
     "localnet:status": "solana cluster-version --url http://127.0.0.1:8899",
-    "test": "vitest run"
+    "test": "vitest run",
+    "dev": "node scripts/build-dashboard.mjs && node --experimental-strip-types scripts/demo.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:gemini": "node --experimental-strip-types scripts/test-gemini.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.36.0",
+    "@playwright/test": "1.56.1",
+    "@types/bn.js": "5.2.0",
     "@types/node": "24.5.2",
     "eslint": "9.36.0",
     "prettier": "3.6.2",
     "typescript": "5.9.2",
     "typescript-eslint": "8.45.0",
     "vitest": "3.2.4"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.32.1",
+    "@solana/web3.js": "1.98.4",
+    "zod": "3.25.76"
   }
 }
