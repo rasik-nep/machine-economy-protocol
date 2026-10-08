@@ -102,6 +102,9 @@ pnpm run test:e2e
 pnpm run test:gemini
 ```
 
-Run browser tests while the demo server is running. The Gemini test is an explicit
-live request using the ignored environment key; normal unit tests mock it.
+`pnpm run test:e2e` reuses a running demo server or starts one with `pnpm dev`.
+Stop any separately started validator first: the demo validator deploys the
+program with the demo wallet as upgrade authority, which `initialize_protocol`
+requires. The Gemini test is an explicit live request using the ignored
+environment key; normal unit tests mock it.
 See [end-to-end-demo.md](end-to-end-demo.md) for the full workflow.

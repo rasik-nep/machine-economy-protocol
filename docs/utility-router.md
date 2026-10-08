@@ -30,8 +30,11 @@ fractional lamport.
 The published offer supplies the default failure probability. An agent's
 off-chain risk estimate can override it by provider ID. This changes only the
 selection calculation; it does not mutate an on-chain offer or release escrow.
-The static demo page includes a clearly labeled hypothetical override for
-Provider Y to show how a future risk update can change the winner.
+The procurement agent starts from genesis-memory estimates
+(`DEMO_AGENT_GENESIS_RISK_BPS`), so Provider X wins the first job. After a
+finalized breach its estimate for X rises to 25% (each later breach adds 25
+points), and Provider Z wins. The static page and the live demo use the same
+estimates and show the same winners.
 
 Build the [market preview](../dist/market.html) with `pnpm run market:build`.
 The output is ignored by Git and uses deterministic fixtures; it does not

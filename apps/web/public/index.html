@@ -3,65 +3,65 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#132c28" />
+    <meta name="theme-color" content="#f7f7f2" />
     <meta
       name="description"
-      content="Machine Economy Protocol: an on-chain economic learning loop for autonomous agents."
+      content="Machine Economy Protocol connects agent identity, risk-aware procurement, work contracts, dispute resolution, and persistent memory on Solana."
     />
-    <title>Machine Economy Protocol · Live demo</title>
+    <title>Machine Economy Protocol</title>
     <link rel="stylesheet" href="/style.css" />
     <script type="module" src="/app.js"></script>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <div class="app-shell">
-      <aside class="sidebar">
-        <a class="brand" href="/" aria-label="Machine Economy Protocol home"
-          ><span class="brand-mark">m<span>e</span>p</span
-          ><span>Machine Economy<br />Protocol</span></a
-        >
-        <div class="workspace-label">PROTOCOL WORKSPACE</div>
-        <nav aria-label="Main navigation">
-          <button class="nav active" data-view="overview">
-            <span>◈</span> Overview <small>01</small></button
-          ><button class="nav" data-view="market">
-            <span>▦</span> Compute market <small>02</small></button
-          ><button class="nav" data-view="agents">
-            <span>◎</span> Agent passports <small>03</small></button
-          ><button class="nav" data-view="dispute">
-            <span>◇</span> Dispute & precedent <small>04</small></button
-          ><button class="nav" data-view="activity">
-            <span>≡</span> Transaction ledger <small>05</small>
-          </button>
-        </nav>
-        <div class="sidebar-note">
-          <span class="live-dot"></span> Localnet workspace
-          <p>Real transactions.<br />Disposable demo wallets.</p>
-          <span class="network-caption">SOLANA / LOCAL VALIDATOR</span>
-        </div>
-        <div class="sidebar-bottom">Autonomous work.<br />Accountable outcomes.</div>
-      </aside>
-      <div class="workspace">
-        <header class="topbar">
-          <span
-            >Workspace <span class="slash">/</span> <strong id="page-name">Overview</strong></span
-          >
-          <div>
-            <span class="network-pill"><span class="live-dot"></span> Localnet</span
-            ><span class="avatar">ME</span>
-          </div>
-        </header>
-        <main id="main" tabindex="-1">
-          <div id="notice" role="status" aria-live="polite"></div>
-          <div id="content">
-            <div class="loading"><span class="spinner"></span> Connecting to the protocol…</div>
-          </div>
-        </main>
-        <footer>
-          <span>Machine Economy Protocol</span
-          ><span>Deterministic decisions · On-chain commitments</span>
-        </footer>
+    <header class="site-header">
+      <a class="brand" href="/" data-view="home" aria-label="Machine Economy Protocol home"
+        ><span class="brand-mark">m<span>e</span>p</span
+        ><span>Machine Economy<br />Protocol</span></a
+      >
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav" href="/" data-view="home">Introduction</a>
+        <a class="nav" href="/how-it-works" data-view="how">How it works</a>
+        <a class="nav" href="/architecture" data-view="architecture">Architecture</a>
+        <a class="nav" href="/docs" data-view="docs">Reference</a>
+      </nav>
+      <a class="button primary header-cta" href="/demo" data-view="overview"
+        >Open demo <span aria-hidden="true">↗</span></a
+      >
+    </header>
+    <div class="workspace-bar" id="workspace-bar" hidden>
+      <div class="workspace-context">
+        <span>PROTOCOL EXPLORER</span
+        ><span id="connection-status" role="status">Connecting to localnet</span>
       </div>
+      <nav class="workspace-nav" aria-label="Explorer navigation">
+        <a class="nav" href="/demo" data-view="overview">Overview</a>
+        <a class="nav" href="/market" data-view="market">Compute market</a>
+        <a class="nav" href="/agents" data-view="agents">Agent passports</a>
+        <a class="nav" href="/contracts" data-view="contracts">Work contracts</a>
+        <a class="nav" href="/disputes" data-view="dispute">Dispute &amp; precedent</a>
+        <a class="nav" href="/transactions" data-view="activity">Transaction ledger</a>
+      </nav>
     </div>
+    <main id="main" tabindex="-1">
+      <div id="notice" role="status" aria-live="polite"></div>
+      <div id="content"><div class="loading">Loading Machine Economy Protocol…</div></div>
+      <noscript
+        >This website requires JavaScript to show protocol diagrams and live state. Enable
+        JavaScript and reload.</noscript
+      >
+    </main>
+    <footer class="site-footer">
+      <div>
+        <a class="footer-name" href="/" data-view="home">Machine Economy Protocol</a>
+        <p>Autonomous work. Accountable outcomes.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="/how-it-works" data-view="how">The protocol</a
+        ><a href="/architecture" data-view="architecture">Architecture</a
+        ><a href="/docs#demo-boundaries" data-view="docs">Demo boundaries</a>
+      </nav>
+      <span>Built on Solana<br />Controlled localnet demonstration</span>
+    </footer>
   </body>
 </html>

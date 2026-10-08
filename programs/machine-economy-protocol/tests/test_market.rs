@@ -1,3 +1,5 @@
+mod common;
+
 use {
     anchor_lang::{
         prelude::Pubkey,
@@ -95,6 +97,7 @@ impl Market {
             &id,
         )
         .0;
+        common::set_upgrade_authority(&mut svm, owner.pubkey());
         send(
             &mut svm,
             &owner,
@@ -105,6 +108,7 @@ impl Market {
                 },
                 machine_economy_protocol::accounts::InitializeProtocol {
                     authority: owner.pubkey(),
+                    program_data: common::program_data_address(),
                     protocol_config,
                     system_program: system_program::ID,
                 },

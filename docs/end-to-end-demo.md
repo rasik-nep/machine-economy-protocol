@@ -12,7 +12,8 @@ pnpm run anchor:build
 pnpm run dev
 ```
 
-Open <http://127.0.0.1:3000>. The launcher starts a local validator with the compiled
+Open <http://127.0.0.1:3000/demo> for the live explorer, or
+<http://127.0.0.1:3000> for the protocol introduction. The launcher starts a local validator with the compiled
 program if port 8899 is free. It uses a new ledger under `.anchor/` without
 removing existing ledgers. If you already have a validator running, it must have
 this version of the program loaded and the matching demo authority. Stop that
@@ -32,7 +33,9 @@ Use **Run full demo** for an approximately one-minute sequence, or:
 2. **Trigger provider failure**: suppress the fixture result, wait beyond the SLA
    deadline, and create structured failure evidence. API: `POST /demo/preempt`.
 3. **Resolve with jury**: open a dispute, commit five votes with independent random
-   nonces, wait for the reveal window, reveal, then finalize and refund 0.005 SOL.
+   nonces, wait for the reveal window, reveal, then finalize and refund Provider X's
+   compute price (0.005 SOL) to the customer. Finalization also increments X's
+   on-chain `breach_count`.
 4. **Publish & update memory**: publish the deterministic precedent root and
    checkpoint the agent's new memory root.
 5. **Run second job**: the same scorer now selects Provider Z; submit, verify, and
@@ -100,8 +103,18 @@ navigation and a 390px mobile viewport. Screenshots go to ignored `test-results/
 
 Anchor/LiteSVM tests exercise real program bytecode and cover valid and invalid
 instruction paths, including incorrect nonces, outsiders, duplicate votes,
-early phase transitions, frozen escrow, both jury outcomes, exact payout amounts,
-and duplicate finalization/precedent rejection.
+early phase transitions, both jury outcomes, the hung-jury refund, the customer
+review window, exact payout amounts, and duplicate finalization/precedent rejection.
+
+## Reliability
+
+Every step checks on-chain state before it sends a transaction, so a step that
+failed partway (for example on an RPC error) can be retried with the same button.
+Compute jobs are created, funded, and started in one atomic transaction. The
+parent contract's deadline is about 4.6 days of slots, so an idle dashboard
+cannot expire it. **Start a fresh run** works at any stage: it builds the next
+run on new accounts and appears next to any error. `pnpm dev` starts an
+isolated validator on a reset ledger (`.anchor/demo-ledger`) each time.
 
 ## Arbitration and security boundary
 
@@ -109,11 +122,16 @@ The configured demo authority co-signs appointment of five distinct controlled
 jurors. Contract parties cannot be jurors. Commitments hash the domain, dispute,
 juror, vote byte, and 32-byte nonce. Reveal is allowed only after the commit
 window and before its deadline. Settlement requires at least three matching
-votes from the five-person panel after the reveal deadline. No majority leaves
-escrow frozen; production timeout recovery is outside this controlled demo.
+votes from the five-person panel after the reveal deadline. A hung jury (no side
+reaches three) refunds the customer, so escrow can never stay locked.
 
-A breach refunds the entire compute price; a no-breach ruling pays the recorded
-provider. Destinations are constrained to contract owners and program-account
+A breach refunds the entire compute price and increments the provider record's
+`breach_count`; a no-breach ruling pays the recorded provider. A submitted result
+can be disputed only during the customer review window
+(`REVIEW_WINDOW_SLOTS` after the deadline); after that window, anyone can call
+`release_unverified` to pay the provider. Only the program's upgrade authority
+can call `initialize_protocol`, so the configuration cannot be front-run on a
+public cluster. Destinations are constrained to contract owners and program-account
 rent is preserved. A precedent is derived from the finalized evidence and tally,
 not arbitrary publisher text. Owner authorization is still required for memory
 checkpointing. This changes escrow and dispute settlement code and is not a

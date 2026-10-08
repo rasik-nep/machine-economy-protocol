@@ -34,10 +34,18 @@ pnpm run anchor:build
 pnpm run dev
 ```
 
-Open <http://127.0.0.1:3000> and choose **Run full demo**. The live dashboard runs
+Open <http://127.0.0.1:3000> to explore the protocol website, then choose
+**Open demo** and **Run full demo**. The live dashboard runs
 real localnet escrow, an agent subcontract, controlled failure, five-juror
 commit/reveal, precedent publication, memory checkpointing, and a second job
 that changes from Provider X to Provider Z.
 
 See [the end-to-end guide](docs/end-to-end-demo.md) for setup, API commands,
 Gemini summaries, testing, and the controlled-demo security boundary.
+
+## Frontend
+
+The website includes an introduction, illustrated protocol walkthrough, architecture,
+searchable reference, and six live explorer pages. All pages have direct URLs and
+responsive layouts. See [the frontend guide](docs/frontend.md) for the route map,
+design decisions, and browser checks.

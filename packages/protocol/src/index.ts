@@ -161,7 +161,9 @@ function sortForCanonicalJson(value: unknown): unknown {
 
   return Object.fromEntries(
     Object.entries(value)
-      .sort(([left], [right]) => left.localeCompare(right))
+      // Code-unit order (as in RFC 8785), never locale collation, so every runtime
+      // and language computes the same roots.
+      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
       .map(([key, item]) => [key, sortForCanonicalJson(item)])
   );
 }

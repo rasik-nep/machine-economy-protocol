@@ -48,4 +48,10 @@ pub enum MepError {
     InvalidSubcontractPrice,
     #[msg("This instruction is part of the Phase 1 skeleton and is not implemented yet.")]
     InstructionStub,
+    #[msg("Only the program upgrade authority can initialize the protocol.")]
+    UnauthorizedInitializer,
+    #[msg("The customer review window for this submitted result is still open.")]
+    ReviewWindowOpen,
+    #[msg("The provider record does not match the disputed contract.")]
+    ProviderRecordMismatch,
 }

@@ -14,7 +14,11 @@ Draft --customer funds quoted price--> Funded
 Funded --provider starts--> Running
 Running --provider submits result root--> Submitted
 Submitted --customer verifies--> Verified
-Verified --customer settles--> Settled
+Verified --anyone settles--> Settled
+Submitted --review window passes, anyone releases--> Settled
+Funded/Running --deadline passes, customer disputes--> Disputed
+Submitted --customer disputes inside review window--> Disputed
+Disputed --jury breach / cleared / hung--> Breached / Settled / Refunded
 ```
 
 `fund_contract` transfers the quoted price in native SOL from the customer to
@@ -25,18 +29,19 @@ escrow counter change atomically with each transfer. Repeating settlement
 fails because the state is already `Settled` and the tracked escrow is zero.
 
 The provider must sign start and submit instructions. The customer must sign
-fund, verify, and settle instructions. A result root must be non-zero. Funding,
+fund and verify. Settlement after verification is permissionless because the
+payout address was fixed at creation. A result root must be non-zero. Funding,
 start, and submission must happen by the deadline. The current verification
 step is customer attestation of the submitted root; the program does not
 inspect private output or evaluate the off-chain verification rule. No LLM can
 release funds.
 
-This phase implements the successful path only. There is currently no
-instruction to refund an expired or disputed contract, and no timeout path if
-the customer never verifies or settles. Avoid funding with non-disposable
-wallets; use localnet test accounts while the dispute and recovery paths are
-implemented. The liability rule is committed but not yet enforced by an
-arbitration instruction.
+A silent customer cannot lock the provider's payment. If the customer neither
+verifies nor disputes a submitted result within `REVIEW_WINDOW_SLOTS` after the
+deadline, anyone can call `release_unverified` to pay the provider. Missed
+deadlines go to the jury dispute; a hung jury refunds the customer. A contract
+that is funded but never started still needs a dispute (co-signed by the demo
+authority) to refund. Use disposable localnet wallets only.
 
 Phase 7 adds agent-service parent contracts and linked child subcontracts;
 see [subcontract.md](subcontract.md).

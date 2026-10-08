@@ -1,4 +1,4 @@
-use crate::{constants::*, error::MepError, state::*};
+use crate::{constants::*, error::MepError, instructions::work_contract::release_escrow, state::*};
 use anchor_lang::prelude::*;
 use solana_sha256_hasher::hashv;
 
@@ -28,12 +28,21 @@ pub fn open(
 ) -> Result<()> {
     let c = &mut ctx.accounts.work_contract;
     let slot = Clock::get()?.slot;
+    // Unfinished work is disputable once its deadline passes. A submitted result
+    // is disputable only inside the customer review window, before it can be
+    // released to the provider by release_unverified.
+    let window_open = match c.status {
+        ContractStatus::Running | ContractStatus::Funded => true,
+        ContractStatus::Submitted => {
+            slot <= c
+                .deadline_slot
+                .checked_add(REVIEW_WINDOW_SLOTS)
+                .ok_or(error!(MepError::InvalidDeadline))?
+        }
+        _ => return err!(MepError::InvalidContractState),
+    };
     require!(
-        matches!(c.status, ContractStatus::Running | ContractStatus::Funded),
-        MepError::InvalidContractState
-    );
-    require!(
-        slot > c.deadline_slot && slot < commit_end && commit_end < reveal_end,
+        window_open && slot > c.deadline_slot && slot < commit_end && commit_end < reveal_end,
         MepError::InvalidDeadline
     );
     require!(
@@ -147,6 +156,10 @@ pub struct FinalizeDispute<'info> {
     /// CHECK: fixed payout destination from signed contract.
     #[account(mut, address = work_contract.provider_authority)]
     pub provider_wallet: UncheckedAccount<'info>,
+    /// Required for compute contracts so a breach ruling is recorded against the
+    /// provider. Agent-to-agent contracts have no provider record.
+    #[account(mut)]
+    pub provider_record: Option<Account<'info, ProviderRecord>>,
 }
 pub fn finalize(ctx: Context<FinalizeDispute>) -> Result<()> {
     let d = &mut ctx.accounts.dispute;
@@ -157,39 +170,38 @@ pub fn finalize(ctx: Context<FinalizeDispute>) -> Result<()> {
             && Clock::get()?.slot > d.reveal_deadline_slot,
         MepError::InvalidDispute
     );
-    // Absolute majority of the appointed five. No majority leaves escrow frozen.
-    require!(
-        d.breach_votes >= 3 || d.reveals - d.breach_votes >= 3,
-        MepError::InvalidDispute
-    );
-    d.provider_breached = d.breach_votes >= 3;
-    require!(
-        c.escrow_lamports == c.price_lamports && c.price_lamports > 0,
-        MepError::EscrowInvariant
-    );
-    let source = c.to_account_info();
-    let target = if d.provider_breached {
-        ctx.accounts.customer_wallet.to_account_info()
-    } else {
+    // An absolute majority of the appointed five decides the ruling. A hung jury
+    // refunds the customer: the provider never delivered an accepted result.
+    let breached = d.breach_votes >= 3;
+    let cleared = d.reveals - d.breach_votes >= 3;
+    d.provider_breached = breached;
+    d.no_majority = !breached && !cleared;
+    if c.provider != Pubkey::default() {
+        let record = ctx
+            .accounts
+            .provider_record
+            .as_mut()
+            .ok_or(error!(MepError::ProviderRecordMismatch))?;
+        require_keys_eq!(record.key(), c.provider, MepError::ProviderRecordMismatch);
+        if breached {
+            record.breach_count = record
+                .breach_count
+                .checked_add(1)
+                .ok_or(error!(MepError::InvalidDispute))?;
+        }
+    }
+    let recipient = if cleared {
         ctx.accounts.provider_wallet.to_account_info()
-    };
-    let amount = c.escrow_lamports;
-    let required = Rent::get()?
-        .minimum_balance(source.data_len())
-        .checked_add(amount)
-        .ok_or(MepError::EscrowInvariant)?;
-    require!(source.lamports() >= required, MepError::EscrowInvariant);
-    let next = target
-        .lamports()
-        .checked_add(amount)
-        .ok_or(MepError::EscrowInvariant)?;
-    **source.try_borrow_mut_lamports()? -= amount;
-    **target.try_borrow_mut_lamports()? = next;
-    c.escrow_lamports = 0;
-    c.status = if d.provider_breached {
-        ContractStatus::Breached
     } else {
+        ctx.accounts.customer_wallet.to_account_info()
+    };
+    release_escrow(c, &recipient)?;
+    c.status = if breached {
+        ContractStatus::Breached
+    } else if cleared {
         ContractStatus::Settled
+    } else {
+        ContractStatus::Refunded
     };
     d.status = DisputeStatus::Finalized;
     Ok(())
@@ -219,7 +231,12 @@ pub fn publish(ctx: Context<PublishPrecedent>) -> Result<()> {
         b"mep.precedent.v1",
         d.key().as_ref(),
         &d.evidence_root,
-        &[d.provider_breached as u8, d.breach_votes, d.reveals],
+        &[
+            d.provider_breached as u8,
+            d.breach_votes,
+            d.reveals,
+            d.no_majority as u8,
+        ],
     ])
     .to_bytes();
     p.published_slot = Clock::get()?.slot;

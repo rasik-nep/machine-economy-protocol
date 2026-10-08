@@ -42,6 +42,7 @@ export default tseslint.config(
       "coverage/",
       "dist/",
       "apps/web/public/app.js",
+      "apps/web/public/site.js",
       "test-results/",
       "playwright-report/",
       "ledger/",

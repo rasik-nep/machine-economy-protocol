@@ -184,6 +184,10 @@ pub mod machine_economy_protocol {
         crate::instructions::work_contract::handle_settle_contract(ctx)
     }
 
+    pub fn release_unverified(ctx: Context<ReleaseUnverified>) -> Result<()> {
+        crate::instructions::work_contract::handle_release_unverified(ctx)
+    }
+
     pub fn open_dispute(
         ctx: Context<OpenDispute>,
         evidence_root: [u8; 32],

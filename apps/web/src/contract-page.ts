@@ -50,6 +50,6 @@ ol{list-style:none;padding:0;margin:24px 0;display:grid;grid-template-columns:re
 <div class="root"><span class="label">Liability</span><strong>Missed deadline · limit ${escapeHtml(contract.terms.liabilityRule.limitLamports.toLocaleString("en-US"))} lamports</strong><code>${escapeHtml(contract.liabilityRuleRoot)}</code></div>
 <div class="root"><span class="label">Submitted result</span><strong>Result commitment</strong><code>${escapeHtml(contract.resultRoot)}</code></div></div></section>
 <section><h2>Contract lifecycle</h2><p>Each transition is a separate Anchor instruction with signer and status checks.</p><ol>${steps}</ol></section>
-<div class="note">This is a deterministic flow preview. LiteSVM tests execute the real instructions and check exact escrow balances. The page does not read live localnet accounts. Breach refunds and dispute settlement are later stages; funds in an unfinished contract have no recovery instruction yet.</div>
+<div class="note">This is a deterministic flow preview. LiteSVM tests execute the real instructions and check exact escrow balances. The page does not read live localnet accounts. A missed deadline is resolved by the jury dispute, and an unverified result is released to the provider after the customer review window.</div>
 </main></body></html>`;
 }

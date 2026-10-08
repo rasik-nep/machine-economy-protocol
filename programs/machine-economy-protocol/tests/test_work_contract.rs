@@ -1,3 +1,5 @@
+mod common;
+
 use {
     anchor_lang::{
         prelude::Pubkey,
@@ -11,7 +13,7 @@ use {
             PROTOCOL_CONFIG_SEED, PROVIDER_RECORD_SEED, WORK_CONTRACT_SEED,
         },
         error::MepError,
-        state::{ContractStatus, WorkContract},
+        state::{ContractStatus, ProviderRecord, WorkContract},
     },
     solana_instruction_error::InstructionError,
     solana_keypair::Keypair,
@@ -111,6 +113,7 @@ impl Fixture {
         )
         .0;
 
+        common::set_upgrade_authority(&mut svm, customer.pubkey());
         send(
             &mut svm,
             &customer,
@@ -121,6 +124,7 @@ impl Fixture {
                 },
                 machine_economy_protocol::accounts::InitializeProtocol {
                     authority: customer.pubkey(),
+                    program_data: common::program_data_address(),
                     protocol_config: config,
                     system_program: system_program::ID,
                 },
@@ -314,12 +318,147 @@ impl Fixture {
         let instruction = ix(
             machine_economy_protocol::instruction::SettleContract {},
             machine_economy_protocol::accounts::SettleContract {
-                customer: signer.pubkey(),
                 work_contract: self.contract,
                 provider_wallet: recipient,
             },
         );
         send(&mut self.svm, signer, instruction)
+    }
+
+    fn release_unverified(
+        &mut self,
+        signer: &Keypair,
+        recipient: Pubkey,
+    ) -> Result<(), FailedTransactionMetadata> {
+        let instruction = ix(
+            machine_economy_protocol::instruction::ReleaseUnverified {},
+            machine_economy_protocol::accounts::ReleaseUnverified {
+                work_contract: self.contract,
+                provider_wallet: recipient,
+            },
+        );
+        send(&mut self.svm, signer, instruction)
+    }
+
+    fn dispute(&self) -> Pubkey {
+        Pubkey::find_program_address(
+            &[
+                machine_economy_protocol::constants::DISPUTE_SEED,
+                self.contract.as_ref(),
+            ],
+            &machine_economy_protocol::id(),
+        )
+        .0
+    }
+
+    fn jurors(&mut self) -> [Keypair; 5] {
+        let jurors: [Keypair; 5] = std::array::from_fn(|_| Keypair::new());
+        for j in &jurors {
+            self.svm.airdrop(&j.pubkey(), 100_000_000).unwrap();
+        }
+        jurors
+    }
+
+    fn open_dispute(
+        &mut self,
+        claimant: &Keypair,
+        jurors: &[Keypair; 5],
+        commit_deadline_slot: u64,
+        reveal_deadline_slot: u64,
+    ) -> Result<(), FailedTransactionMetadata> {
+        let id = machine_economy_protocol::id();
+        let instruction = ix(
+            machine_economy_protocol::instruction::OpenDispute {
+                evidence_root: [77; 32],
+                jurors: std::array::from_fn(|n| jurors[n].pubkey()),
+                commit_deadline_slot,
+                reveal_deadline_slot,
+            },
+            machine_economy_protocol::accounts::OpenDispute {
+                claimant: claimant.pubkey(),
+                demo_authority: claimant.pubkey(),
+                protocol_config: Pubkey::find_program_address(&[PROTOCOL_CONFIG_SEED], &id).0,
+                work_contract: self.contract,
+                dispute: self.dispute(),
+                system_program: system_program::ID,
+            },
+        );
+        send(&mut self.svm, claimant, instruction)
+    }
+
+    fn juror_record(&self, juror: Pubkey) -> Pubkey {
+        Pubkey::find_program_address(
+            &[
+                machine_economy_protocol::constants::JUROR_RECORD_SEED,
+                self.dispute().as_ref(),
+                juror.as_ref(),
+            ],
+            &machine_economy_protocol::id(),
+        )
+        .0
+    }
+
+    fn commit_vote(&mut self, juror: &Keypair, vote: u8) -> Result<(), FailedTransactionMetadata> {
+        let dispute = self.dispute();
+        let instruction = ix(
+            machine_economy_protocol::instruction::CommitVote {
+                commitment: solana_sha256_hasher::hashv(&[
+                    b"mep.vote.v1",
+                    dispute.as_ref(),
+                    juror.pubkey().as_ref(),
+                    &[vote],
+                    &[88; 32],
+                ])
+                .to_bytes(),
+            },
+            machine_economy_protocol::accounts::CommitVote {
+                juror: juror.pubkey(),
+                dispute,
+                juror_record: self.juror_record(juror.pubkey()),
+                system_program: system_program::ID,
+            },
+        );
+        send(&mut self.svm, juror, instruction)
+    }
+
+    fn reveal_vote(&mut self, juror: &Keypair, vote: u8) -> Result<(), FailedTransactionMetadata> {
+        let instruction = ix(
+            machine_economy_protocol::instruction::RevealVote {
+                vote,
+                nonce: [88; 32],
+            },
+            machine_economy_protocol::accounts::RevealVote {
+                juror: juror.pubkey(),
+                dispute: self.dispute(),
+                juror_record: self.juror_record(juror.pubkey()),
+            },
+        );
+        send(&mut self.svm, juror, instruction)
+    }
+
+    fn finalize(
+        &mut self,
+        signer: &Keypair,
+        provider_record: Option<Pubkey>,
+    ) -> Result<(), FailedTransactionMetadata> {
+        let instruction = ix(
+            machine_economy_protocol::instruction::FinalizeDispute {},
+            machine_economy_protocol::accounts::FinalizeDispute {
+                dispute: self.dispute(),
+                work_contract: self.contract,
+                customer_wallet: self.customer.pubkey(),
+                provider_wallet: self.provider.pubkey(),
+                provider_record,
+            },
+        );
+        send(&mut self.svm, signer, instruction)
+    }
+
+    fn breach_count(&self) -> u32 {
+        let account = self.svm.get_account(&self.provider_record).unwrap();
+        ProviderRecord::try_deserialize(&mut account.data.as_slice())
+            .unwrap()
+            .breach_count
     }
 
     fn state(&self) -> WorkContract {
@@ -619,7 +758,7 @@ fn start_and_submit_require_provider_and_correct_state() {
 }
 
 #[test]
-fn verify_and_settle_require_customer_and_verified_state() {
+fn verify_requires_customer_and_settle_pays_only_the_fixed_provider() {
     let mut fixture = Fixture::new();
     fixture.create([20; 32], u64::MAX - 1).unwrap();
     let provider = Keypair::new_from_array(fixture.provider.to_bytes()[..32].try_into().unwrap());
@@ -642,7 +781,8 @@ fn verify_and_settle_require_customer_and_verified_state() {
         .svm
         .airdrop(&attacker.pubkey(), 1_000_000_000)
         .unwrap();
-    assert!(fixture.settle(&attacker, provider.pubkey()).is_err());
+    // Settlement is permissionless after verification, but the payout address is fixed.
+    assert!(fixture.settle(&attacker, attacker.pubkey()).is_err());
     assert!(fixture.settle(&customer, attacker.pubkey()).is_err());
     let provider_before = fixture
         .svm
@@ -650,7 +790,7 @@ fn verify_and_settle_require_customer_and_verified_state() {
         .unwrap()
         .lamports;
     let contract_before = fixture.svm.get_account(&fixture.contract).unwrap().lamports;
-    fixture.settle(&customer, provider.pubkey()).unwrap();
+    fixture.settle(&attacker, provider.pubkey()).unwrap();
     let provider_after = fixture
         .svm
         .get_account(&provider.pubkey())
@@ -854,7 +994,6 @@ fn child_escrow_settles_to_supplier_agent_owner() {
         ix(
             machine_economy_protocol::instruction::SettleContract {},
             machine_economy_protocol::accounts::SettleContract {
-                customer: customer.pubkey(),
                 work_contract: child,
                 provider_wallet: supplier.pubkey(),
             },
@@ -920,7 +1059,6 @@ fn child_escrow_settles_to_supplier_agent_owner() {
         ix(
             machine_economy_protocol::instruction::SettleContract {},
             machine_economy_protocol::accounts::SettleContract {
-                customer: client.pubkey(),
                 work_contract: parent,
                 provider_wallet: customer.pubkey(),
             },
@@ -1051,6 +1189,7 @@ fn dispute_commit_reveal_refund_and_precedent_are_guarded() {
                 work_contract: f.contract,
                 customer_wallet: customer.pubkey(),
                 provider_wallet: provider.pubkey(),
+                provider_record: Some(f.provider_record),
             },
         );
         assert!(send(&mut f.svm, &jurors[0], finalize.clone()).is_err());
@@ -1076,6 +1215,16 @@ fn dispute_commit_reveal_refund_and_precedent_are_guarded() {
         let d = Dispute::try_deserialize(&mut account.data.as_slice()).unwrap();
         assert!(d.status == DisputeStatus::Finalized);
         assert_eq!(d.provider_breached, breach);
+        assert!(!d.no_majority);
+        assert_eq!(f.breach_count(), u32::from(breach));
+        assert!(
+            f.state().status
+                == if breach {
+                    ContractStatus::Breached
+                } else {
+                    ContractStatus::Settled
+                }
+        );
         send(&mut f.svm, &customer, publish.clone()).unwrap();
         assert!(send(&mut f.svm, &customer, publish).is_err());
         let account = f.svm.get_account(&precedent).unwrap();
@@ -1086,7 +1235,7 @@ fn dispute_commit_reveal_refund_and_precedent_are_guarded() {
                 b"mep.precedent.v1",
                 dispute.as_ref(),
                 &[77; 32],
-                &[breach as u8, if breach { 5 } else { 0 }, 5]
+                &[breach as u8, if breach { 5 } else { 0 }, 5, 0]
             ])
             .to_bytes()
         );
@@ -1094,119 +1243,143 @@ fn dispute_commit_reveal_refund_and_precedent_are_guarded() {
 }
 
 #[test]
-fn missing_majority_keeps_disputed_escrow_frozen() {
-    use machine_economy_protocol::{
-        accounts as a,
-        constants::{DISPUTE_SEED, JUROR_RECORD_SEED},
-        instruction as i,
-    };
-    use solana_sha256_hasher::hashv;
+fn hung_jury_refunds_customer_without_recording_a_breach() {
+    use machine_economy_protocol::state::{Dispute, DisputeStatus};
     let mut f = Fixture::new();
     let customer = Keypair::new_from_array(f.customer.to_bytes()[..32].try_into().unwrap());
     let provider = Keypair::new_from_array(f.provider.to_bytes()[..32].try_into().unwrap());
     f.create([20; 32], 100).unwrap();
     f.fund(&customer).unwrap();
     f.start(&provider).unwrap();
-    let id = machine_economy_protocol::id();
-    let config = Pubkey::find_program_address(&[PROTOCOL_CONFIG_SEED], &id).0;
-    let dispute = Pubkey::find_program_address(&[DISPUTE_SEED, f.contract.as_ref()], &id).0;
-    let jurors: [Keypair; 5] = std::array::from_fn(|_| Keypair::new());
-    for j in &jurors {
-        f.svm.airdrop(&j.pubkey(), 100_000_000).unwrap();
-    }
+    let jurors = f.jurors();
     f.svm.warp_to_slot(101);
-    send(
-        &mut f.svm,
-        &customer,
-        ix(
-            i::OpenDispute {
-                evidence_root: [77; 32],
-                jurors: std::array::from_fn(|n| jurors[n].pubkey()),
-                commit_deadline_slot: 200,
-                reveal_deadline_slot: 300,
-            },
-            a::OpenDispute {
-                claimant: customer.pubkey(),
-                demo_authority: customer.pubkey(),
-                protocol_config: config,
-                work_contract: f.contract,
-                dispute,
-                system_program: system_program::ID,
-            },
-        ),
-    )
-    .unwrap();
-    for j in jurors.iter().take(2) {
-        let r = Pubkey::find_program_address(
-            &[JUROR_RECORD_SEED, dispute.as_ref(), j.pubkey().as_ref()],
-            &id,
-        )
-        .0;
-        send(
-            &mut f.svm,
-            j,
-            ix(
-                i::CommitVote {
-                    commitment: hashv(&[
-                        b"mep.vote.v1",
-                        dispute.as_ref(),
-                        j.pubkey().as_ref(),
-                        &[1],
-                        &[88; 32],
-                    ])
-                    .to_bytes(),
-                },
-                a::CommitVote {
-                    juror: j.pubkey(),
-                    dispute,
-                    juror_record: r,
-                    system_program: system_program::ID,
-                },
-            ),
-        )
-        .unwrap();
+    f.open_dispute(&customer, &jurors, 200, 300).unwrap();
+    // Two breach votes and one cleared vote: no side reaches three of five.
+    for (j, vote) in jurors.iter().zip([1, 1, 2]) {
+        f.commit_vote(j, vote).unwrap();
     }
     f.svm.warp_to_slot(201);
-    for j in jurors.iter().take(2) {
-        let r = Pubkey::find_program_address(
-            &[JUROR_RECORD_SEED, dispute.as_ref(), j.pubkey().as_ref()],
-            &id,
-        )
-        .0;
-        send(
-            &mut f.svm,
-            j,
-            ix(
-                i::RevealVote {
-                    vote: 1,
-                    nonce: [88; 32],
-                },
-                a::RevealVote {
-                    juror: j.pubkey(),
-                    dispute,
-                    juror_record: r,
-                },
-            ),
-        )
-        .unwrap();
+    for (j, vote) in jurors.iter().zip([1, 1, 2]) {
+        f.reveal_vote(j, vote).unwrap();
     }
+    let early = f.finalize(&customer, Some(f.provider_record)).unwrap_err();
+    assert_mep_error(early, MepError::InvalidDispute);
     f.svm.warp_to_slot(301);
-    let before = f.svm.get_account(&f.contract).unwrap().lamports;
-    let result = send(
-        &mut f.svm,
-        &customer,
-        ix(
-            i::FinalizeDispute {},
-            a::FinalizeDispute {
-                dispute,
-                work_contract: f.contract,
-                customer_wallet: customer.pubkey(),
-                provider_wallet: provider.pubkey(),
-            },
-        ),
+
+    // Compute contracts must name their provider record so reputation cannot be skipped.
+    let missing_record = f.finalize(&customer, None).unwrap_err();
+    assert_mep_error(missing_record, MepError::ProviderRecordMismatch);
+
+    let before = f.svm.get_account(&customer.pubkey()).unwrap().lamports;
+    let cranker = Keypair::new();
+    f.svm.airdrop(&cranker.pubkey(), 100_000_000).unwrap();
+    f.finalize(&cranker, Some(f.provider_record)).unwrap();
+    assert_eq!(
+        f.svm.get_account(&customer.pubkey()).unwrap().lamports - before,
+        8_000_000
     );
-    assert_mep_error(result.unwrap_err(), MepError::InvalidDispute);
-    assert_eq!(f.state().escrow_lamports, 8_000_000);
-    assert_eq!(f.svm.get_account(&f.contract).unwrap().lamports, before);
+    assert_eq!(f.state().escrow_lamports, 0);
+    assert!(f.state().status == ContractStatus::Refunded);
+    assert_eq!(f.breach_count(), 0);
+    let d = Dispute::try_deserialize(&mut f.svm.get_account(&f.dispute()).unwrap().data.as_slice())
+        .unwrap();
+    assert!(d.status == DisputeStatus::Finalized);
+    assert!(d.no_majority);
+    assert!(!d.provider_breached);
+    let repeated = f.finalize(&customer, Some(f.provider_record)).unwrap_err();
+    assert_mep_error(repeated, MepError::InvalidDispute);
+}
+
+#[test]
+fn unverified_result_releases_to_provider_after_review_window() {
+    use machine_economy_protocol::constants::REVIEW_WINDOW_SLOTS;
+    let mut f = Fixture::new();
+    let customer = Keypair::new_from_array(f.customer.to_bytes()[..32].try_into().unwrap());
+    let provider = Keypair::new_from_array(f.provider.to_bytes()[..32].try_into().unwrap());
+    f.create([20; 32], 100).unwrap();
+    f.fund(&customer).unwrap();
+    f.start(&provider).unwrap();
+    let running = f
+        .release_unverified(&provider, provider.pubkey())
+        .unwrap_err();
+    assert_mep_error(running, MepError::InvalidContractState);
+    f.submit(&provider, [30; 32]).unwrap();
+
+    let review_end = 100 + REVIEW_WINDOW_SLOTS;
+    f.svm.warp_to_slot(review_end);
+    let open = f
+        .release_unverified(&provider, provider.pubkey())
+        .unwrap_err();
+    assert_mep_error(open, MepError::ReviewWindowOpen);
+
+    f.svm.warp_to_slot(review_end + 1);
+    assert!(f.release_unverified(&customer, customer.pubkey()).is_err());
+    let before = f.svm.get_account(&provider.pubkey()).unwrap().lamports;
+    f.release_unverified(&customer, provider.pubkey()).unwrap();
+    assert_eq!(
+        f.svm.get_account(&provider.pubkey()).unwrap().lamports - before,
+        8_000_000
+    );
+    assert_eq!(f.state().escrow_lamports, 0);
+    assert!(f.state().status == ContractStatus::Settled);
+    let repeated = f
+        .release_unverified(&provider, provider.pubkey())
+        .unwrap_err();
+    assert_mep_error(repeated, MepError::InvalidContractState);
+}
+
+#[test]
+fn submitted_result_is_disputable_only_inside_review_window() {
+    use machine_economy_protocol::constants::REVIEW_WINDOW_SLOTS;
+    let review_end = 100 + REVIEW_WINDOW_SLOTS;
+
+    let mut late = Fixture::new();
+    let customer = Keypair::new_from_array(late.customer.to_bytes()[..32].try_into().unwrap());
+    let provider = Keypair::new_from_array(late.provider.to_bytes()[..32].try_into().unwrap());
+    late.create([20; 32], 100).unwrap();
+    late.fund(&customer).unwrap();
+    late.start(&provider).unwrap();
+    late.submit(&provider, [30; 32]).unwrap();
+    let jurors = late.jurors();
+    late.svm.warp_to_slot(review_end + 1);
+    let expired = late
+        .open_dispute(&customer, &jurors, review_end + 50, review_end + 100)
+        .unwrap_err();
+    assert_mep_error(expired, MepError::InvalidDeadline);
+    assert!(late.state().status == ContractStatus::Submitted);
+
+    let mut f = Fixture::new();
+    let customer = Keypair::new_from_array(f.customer.to_bytes()[..32].try_into().unwrap());
+    let provider = Keypair::new_from_array(f.provider.to_bytes()[..32].try_into().unwrap());
+    f.create([20; 32], 100).unwrap();
+    f.fund(&customer).unwrap();
+    f.start(&provider).unwrap();
+    f.submit(&provider, [30; 32]).unwrap();
+    let jurors = f.jurors();
+    f.svm.warp_to_slot(review_end);
+    f.open_dispute(&customer, &jurors, review_end + 50, review_end + 100)
+        .unwrap();
     assert!(f.state().status == ContractStatus::Disputed);
+    // A disputed result can no longer be released by timeout.
+    f.svm.warp_to_slot(review_end + 1);
+    let blocked = f
+        .release_unverified(&provider, provider.pubkey())
+        .unwrap_err();
+    assert_mep_error(blocked, MepError::InvalidContractState);
+    for j in &jurors {
+        f.commit_vote(j, 1).unwrap();
+    }
+    f.svm.warp_to_slot(review_end + 51);
+    for j in &jurors {
+        f.reveal_vote(j, 1).unwrap();
+    }
+    f.svm.warp_to_slot(review_end + 101);
+    let before = f.svm.get_account(&customer.pubkey()).unwrap().lamports;
+    f.finalize(&provider, Some(f.provider_record)).unwrap();
+    assert_eq!(
+        f.svm.get_account(&customer.pubkey()).unwrap().lamports - before,
+        8_000_000
+    );
+    assert!(f.state().status == ContractStatus::Breached);
+    assert_eq!(f.breach_count(), 1);
 }

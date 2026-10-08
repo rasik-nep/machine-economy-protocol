@@ -1,4 +1,5 @@
 import {
+  DEMO_AGENT_GENESIS_RISK_BPS,
   DEMO_COMPUTE_OFFERS,
   DEMO_CONTRACT_TERMS,
   DEMO_MODEL_INSTANCES,
@@ -25,6 +26,7 @@ import {
   sha256Hex,
   canonicalize
 } from "@mep/protocol";
+import { raiseRiskAfterBreach } from "../../../packages/protocol/src/learning.ts";
 
 export const APP_NAME = "Machine Economy Protocol";
 export const FIRST_UI_MODE = "guided-judge-demo";
@@ -60,6 +62,7 @@ export type RouterScreenModel = {
   readonly agentName: string;
   readonly requiredCapabilities: readonly string[];
   readonly baseline: readonly UtilityBreakdown[];
+  readonly breachedProviderId: string;
   readonly riskUpdate: readonly UtilityBreakdown[];
 };
 
@@ -172,6 +175,8 @@ export async function buildMarketScreenModel(): Promise<MarketScreenModel> {
   };
 }
 
+// Mirrors the live localnet demo: the agent ranks offers with its genesis memory,
+// the first winner breaches, and the learned estimate changes the next choice.
 export function buildRouterScreenModel(): RouterScreenModel {
   const agent = STOCK_AGENT_MANIFESTS[0];
   const input = {
@@ -180,16 +185,26 @@ export function buildRouterScreenModel(): RouterScreenModel {
     offers: DEMO_COMPUTE_OFFERS,
     stockModels: STOCK_MODEL_MANIFESTS,
     policy: agent.policy,
-    requiredCapabilities: ["evidence-summary"]
+    requiredCapabilities: ["evidence-summary"],
+    failureProbabilityOverridesBps: DEMO_AGENT_GENESIS_RISK_BPS
   };
+  const baseline = rankComputeOffers(input);
+  const breached = baseline[0];
+  if (!breached) throw new Error("No eligible offer for the demo agent");
 
   return {
     agentName: agent.displayName,
     requiredCapabilities: input.requiredCapabilities,
-    baseline: rankComputeOffers(input),
+    baseline,
+    breachedProviderId: breached.providerId,
     riskUpdate: rankComputeOffers({
       ...input,
-      failureProbabilityOverridesBps: { "provider-y": 2_500 }
+      failureProbabilityOverridesBps: {
+        ...DEMO_AGENT_GENESIS_RISK_BPS,
+        [breached.providerId]: raiseRiskAfterBreach(
+          DEMO_AGENT_GENESIS_RISK_BPS[breached.providerId]
+        )
+      }
     })
   };
 }

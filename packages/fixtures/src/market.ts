@@ -81,3 +81,11 @@ export const DEMO_COMPUTE_OFFERS = [
     reservationClass: "dedicated"
   }
 ] as const satisfies readonly ComputeOfferMarketRecord[];
+
+// The procurement agent's genesis memory: its own failure estimates per provider,
+// which override the providers' self-published offer risk when it ranks offers.
+export const DEMO_AGENT_GENESIS_RISK_BPS: Readonly<Record<string, number>> = {
+  "provider-x": 100,
+  "provider-y": 900,
+  "provider-z": 100
+};

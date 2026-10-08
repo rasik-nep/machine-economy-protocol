@@ -1,3 +1,5 @@
+mod common;
+
 use {
     anchor_lang::{
         prelude::Pubkey,
@@ -66,6 +68,23 @@ fn send_initialize(
     protocol_version: u16,
     demo_authority: Pubkey,
 ) -> Result<(), FailedTransactionMetadata> {
+    common::set_upgrade_authority(svm, payer.pubkey());
+    send_initialize_as(
+        svm,
+        payer,
+        protocol_config,
+        protocol_version,
+        demo_authority,
+    )
+}
+
+fn send_initialize_as(
+    svm: &mut LiteSVM,
+    payer: &Keypair,
+    protocol_config: Pubkey,
+    protocol_version: u16,
+    demo_authority: Pubkey,
+) -> Result<(), FailedTransactionMetadata> {
     let program_id = machine_economy_protocol::id();
     let instruction = Instruction::new_with_bytes(
         program_id,
@@ -76,6 +95,7 @@ fn send_initialize(
         .data(),
         machine_economy_protocol::accounts::InitializeProtocol {
             authority: payer.pubkey(),
+            program_data: common::program_data_address(),
             protocol_config,
             system_program: system_program::ID,
         }
@@ -191,6 +211,40 @@ fn initialize_protocol_rejects_zero_version() {
         ) if code == u32::from(MepError::InvalidProtocolVersion)
     ));
     assert!(svm.get_account(&protocol_config).is_none());
+}
+
+#[test]
+fn initialize_protocol_rejects_anyone_but_the_upgrade_authority() {
+    let program_id = machine_economy_protocol::id();
+    let deployer = Keypair::new();
+    let attacker = Keypair::new();
+    let protocol_config = Pubkey::find_program_address(&[PROTOCOL_CONFIG_SEED], &program_id).0;
+    let mut svm = svm_with_program(program_id);
+    svm.airdrop(&deployer.pubkey(), 1_000_000_000).unwrap();
+    svm.airdrop(&attacker.pubkey(), 1_000_000_000).unwrap();
+
+    // An immutable program (no upgrade authority) cannot be initialized by anyone.
+    let immutable =
+        send_initialize_as(&mut svm, &attacker, protocol_config, 1, attacker.pubkey()).unwrap_err();
+    assert!(matches!(
+        immutable.err,
+        TransactionError::InstructionError(0, InstructionError::Custom(code))
+            if code == u32::from(MepError::UnauthorizedInitializer)
+    ));
+
+    common::set_upgrade_authority(&mut svm, deployer.pubkey());
+    svm.expire_blockhash();
+    let front_run =
+        send_initialize_as(&mut svm, &attacker, protocol_config, 1, attacker.pubkey()).unwrap_err();
+    assert!(matches!(
+        front_run.err,
+        TransactionError::InstructionError(0, InstructionError::Custom(code))
+            if code == u32::from(MepError::UnauthorizedInitializer)
+    ));
+    assert!(svm.get_account(&protocol_config).is_none());
+
+    send_initialize_as(&mut svm, &deployer, protocol_config, 1, deployer.pubkey()).unwrap();
+    assert!(svm.get_account(&protocol_config).is_some());
 }
 
 #[test]

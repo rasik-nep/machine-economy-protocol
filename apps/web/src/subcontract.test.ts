@@ -12,12 +12,12 @@ describe("subcontract dependency view", () => {
 
     expect(model.agentAName).toBe(STOCK_AGENT_MANIFESTS[0].displayName);
     expect(model.supplierAgentName).toBe(STOCK_AGENT_MANIFESTS[1].displayName);
-    expect(model.computeProviderId).toBe("provider-y");
+    expect(model.computeProviderId).toBe("provider-x");
     expect(model.parentRevenueLamports).toBe(15_000_000);
-    expect(model.computeCostLamports).toBe(8_000_000);
+    expect(model.computeCostLamports).toBe(5_000_000);
     expect(model.childCostLamports).toBe(3_000_000);
-    expect(model.marginLamports).toBe(4_000_000n);
-    expect(model.alternateMarginLamports).toBe(3_000_000n);
+    expect(model.marginLamports).toBe(7_000_000n);
+    expect(model.alternateMarginLamports).toBe(6_000_000n);
     expect(model.childDeadlineOffsetSlots).toBeLessThan(model.parentDeadlineOffsetSlots);
     expect(model.childTaskRoot).toBe(await sha256Hex(canonicalize(DEMO_SUBCONTRACT_TERMS.task)));
 
@@ -25,7 +25,7 @@ describe("subcontract dependency view", () => {
     expect(page).toContain("Dependency graph");
     expect(page).toContain(model.parentId);
     expect(page).toContain(model.childId);
-    expect(page).toContain("4,000,000");
-    expect(page).toContain("3,000,000");
+    expect(page).toContain("7,000,000");
+    expect(page).toContain("6,000,000");
   });
 });

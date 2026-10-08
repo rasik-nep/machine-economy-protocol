@@ -1,8 +1,9 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
-import { DemoChain } from "./chain.ts";
+import { DemoChain, describeError } from "./chain.ts";
 import { explainRuling } from "./summary.ts";
+import { pageForPath } from "../../web/src/site.ts";
 export const json = (data: unknown) =>
   JSON.stringify(data, (_key, value: unknown) =>
     typeof value === "bigint" ? value.toString() : value
@@ -20,11 +21,15 @@ export function createDemoServer(chain: DemoChain) {
       }
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("Cache-Control", "no-store");
-      const path = req.url;
-      if (req.method === "GET" && (path === "/" || path === "/style.css" || path === "/app.js")) {
+      const path = new URL(req.url ?? "/", `http://${host}`).pathname;
+      const isPage = pageForPath(path) !== undefined;
+      if (
+        req.method === "GET" &&
+        (isPage || ["/style.css", "/app.js", "/site.js"].includes(path))
+      ) {
         res.setHeader(
           "Content-Type",
-          path === "/"
+          isPage
             ? "text/html; charset=utf-8"
             : path.endsWith("css")
               ? "text/css"
@@ -34,7 +39,12 @@ export function createDemoServer(chain: DemoChain) {
           "Content-Security-Policy",
           "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
         );
-        res.end(await readFile(`apps/web/public/${path === "/" ? "index.html" : path.slice(1)}`));
+        try {
+          res.end(await readFile(`apps/web/public/${isPage ? "index.html" : path.slice(1)}`));
+        } catch {
+          res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8" });
+          res.end("Dashboard bundle missing. Start the demo with `pnpm dev`, which builds it.");
+        }
         return;
       }
       res.setHeader("Content-Type", "application/json");
@@ -51,7 +61,7 @@ export function createDemoServer(chain: DemoChain) {
           "/demo/reset",
           "/demo/run",
           "/demo/summary"
-        ].includes(path ?? "")
+        ].includes(path)
       ) {
         res.writeHead(404);
         res.end(json({ error: "Not found" }));
@@ -102,31 +112,22 @@ export function createDemoServer(chain: DemoChain) {
         res.end(json({ error: "A finalized ruling is required" }));
         return;
       }
-      if (path === "/demo/reset" && chain.stage > 0 && chain.stage < 8) {
-        res.writeHead(409);
-        res.end(
-          json({ error: "Finish the current run before starting another; escrow is still active." })
-        );
-        return;
-      }
       busy = true;
       lastError = null;
       try {
         if (path === "/demo/reset") await chain.reset();
-        else if (path === "/demo/summary")
-          chain.summary = await explainRuling({
-            provider: "Provider X",
-            refundLamports: 5_000_000,
-            breachVotes: 5
-          });
-        else if (path === "/demo/run") {
+        else if (path === "/demo/summary") {
+          const facts = await chain.ruling();
+          if (!facts) throw new Error("A finalized ruling is required");
+          chain.summary = await explainRuling(facts);
+        } else if (path === "/demo/run") {
           while (chain.stage < 8) await chain.next();
         } else if (path === "/demo/resolve") {
           while (chain.stage < 6) await chain.next();
         } else await chain.next();
         res.end(json({ ...(await chain.snapshot()), busy: false, error: null }));
       } catch (error) {
-        lastError = error instanceof Error ? error.message : "Operation failed";
+        lastError = describeError(error);
         res.writeHead(500);
         res.end(json({ error: lastError }));
       } finally {

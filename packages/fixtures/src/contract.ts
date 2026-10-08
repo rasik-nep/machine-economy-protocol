@@ -10,7 +10,7 @@ export const DEMO_CONTRACT_TERMS = {
   },
   liabilityRule: {
     kind: "missed-deadline-provider-liability",
-    limitLamports: 8_000_000
+    limitLamports: 5_000_000
   }
 } as const satisfies DemoContractTerms;
 

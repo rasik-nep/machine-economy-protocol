@@ -97,6 +97,7 @@ pub enum ContractStatus {
     Settled,
     Disputed,
     Breached,
+    Refunded,
 }
 
 #[account]
@@ -107,6 +108,7 @@ pub struct Dispute {
     pub reveals: u8,
     pub breach_votes: u8,
     pub provider_breached: bool,
+    pub no_majority: bool,
     pub work_contract: Pubkey,
     pub claimant: Pubkey,
     pub evidence_root: [u8; 32],

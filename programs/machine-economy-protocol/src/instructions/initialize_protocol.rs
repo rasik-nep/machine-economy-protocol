@@ -1,4 +1,4 @@
-use anchor_lang::prelude::*;
+use anchor_lang::{prelude::*, solana_program::bpf_loader_upgradeable};
 
 use crate::{constants::PROTOCOL_CONFIG_SEED, error::MepError, state::ProtocolConfig};
 
@@ -6,6 +6,16 @@ use crate::{constants::PROTOCOL_CONFIG_SEED, error::MepError, state::ProtocolCon
 pub struct InitializeProtocol<'info> {
     #[account(mut)]
     pub authority: Signer<'info>,
+    // Only the deployer can claim the singleton config, so a public cluster
+    // cannot be front-run between deployment and initialization.
+    #[account(
+        seeds = [crate::ID.as_ref()],
+        bump,
+        seeds::program = bpf_loader_upgradeable::ID,
+        constraint = program_data.upgrade_authority_address == Some(authority.key())
+            @ MepError::UnauthorizedInitializer
+    )]
+    pub program_data: Account<'info, ProgramData>,
     #[account(
         init,
         payer = authority,

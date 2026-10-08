@@ -1741,6 +1741,7 @@ name = "machine-economy-protocol"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "bincode",
  "litesvm",
  "solana-instruction-error",
  "solana-keypair",

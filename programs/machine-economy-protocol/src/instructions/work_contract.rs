@@ -1,7 +1,7 @@
 use anchor_lang::{prelude::*, system_program};
 
 use crate::{
-    constants::WORK_CONTRACT_SEED,
+    constants::{REVIEW_WINDOW_SLOTS, WORK_CONTRACT_SEED},
     error::MepError,
     state::{AgentPassport, ComputeOffer, ContractStatus, ProviderRecord, WorkContract},
 };
@@ -180,10 +180,11 @@ pub fn handle_verify_contract(ctx: Context<VerifyContract>) -> Result<()> {
     Ok(())
 }
 
+// Settlement is permissionless: the customer already attested the result in
+// verify_contract, and the payout address was fixed when the contract was created.
 #[derive(Accounts)]
 pub struct SettleContract<'info> {
-    pub customer: Signer<'info>,
-    #[account(mut, constraint = work_contract.customer_owner == customer.key())]
+    #[account(mut)]
     pub work_contract: Account<'info, WorkContract>,
     /// CHECK: Receiving lamports only; address is fixed when the contract is created.
     #[account(mut, address = work_contract.provider_authority)]
@@ -196,30 +197,66 @@ pub fn handle_settle_contract(ctx: Context<SettleContract>) -> Result<()> {
         contract.status == ContractStatus::Verified,
         MepError::InvalidContractState
     );
+    release_escrow(contract, &ctx.accounts.provider_wallet.to_account_info())?;
+    contract.status = ContractStatus::Settled;
+    Ok(())
+}
+
+// A submitted result the customer neither verified nor disputed before the review
+// window closed is paid to the provider, so a silent customer cannot lock escrow.
+#[derive(Accounts)]
+pub struct ReleaseUnverified<'info> {
+    #[account(mut)]
+    pub work_contract: Account<'info, WorkContract>,
+    /// CHECK: Receiving lamports only; address is fixed when the contract is created.
+    #[account(mut, address = work_contract.provider_authority)]
+    pub provider_wallet: UncheckedAccount<'info>,
+}
+
+pub fn handle_release_unverified(ctx: Context<ReleaseUnverified>) -> Result<()> {
+    let contract = &mut ctx.accounts.work_contract;
+    require!(
+        contract.status == ContractStatus::Submitted,
+        MepError::InvalidContractState
+    );
+    let review_end = contract
+        .deadline_slot
+        .checked_add(REVIEW_WINDOW_SLOTS)
+        .ok_or(error!(MepError::InvalidDeadline))?;
+    require!(Clock::get()?.slot > review_end, MepError::ReviewWindowOpen);
+    release_escrow(contract, &ctx.accounts.provider_wallet.to_account_info())?;
+    contract.status = ContractStatus::Settled;
+    Ok(())
+}
+
+/// Moves the full tracked escrow out of a program-owned contract account, leaving
+/// its rent-exempt floor in place. Callers set the resulting contract status.
+pub(crate) fn release_escrow(
+    contract: &mut Account<WorkContract>,
+    recipient: &AccountInfo,
+) -> Result<()> {
     require!(
         contract.escrow_lamports == contract.price_lamports && contract.escrow_lamports > 0,
         MepError::EscrowInvariant
     );
-
+    let amount = contract.escrow_lamports;
     let contract_info = contract.to_account_info();
-    let provider_info = ctx.accounts.provider_wallet.to_account_info();
     let rent_floor = Rent::get()?.minimum_balance(contract_info.data_len());
     let contract_balance = contract_info.lamports();
     let required_balance = rent_floor
-        .checked_add(contract.escrow_lamports)
+        .checked_add(amount)
         .ok_or(error!(MepError::EscrowInvariant))?;
     require!(
         contract_balance >= required_balance,
         MepError::EscrowInvariant
     );
-    let provider_balance = provider_info.lamports();
-    let new_provider_balance = provider_balance
-        .checked_add(contract.escrow_lamports)
+    let new_recipient_balance = recipient
+        .lamports()
+        .checked_add(amount)
         .ok_or(error!(MepError::EscrowInvariant))?;
 
-    **contract_info.try_borrow_mut_lamports()? = contract_balance - contract.escrow_lamports;
-    **provider_info.try_borrow_mut_lamports()? = new_provider_balance;
+    **contract_info.try_borrow_mut_lamports()? = contract_balance - amount;
+    **recipient.try_borrow_mut_lamports()? = new_recipient_balance;
     contract.escrow_lamports = 0;
-    contract.status = ContractStatus::Settled;
     Ok(())
 }

@@ -14,10 +14,15 @@ const responseSchema = z.object({
     )
     .optional()
 });
-export async function explainRuling(
-  input: { provider: string; refundLamports: number; breachVotes: number },
-  fetcher: typeof fetch = fetch
-) {
+export type RulingFacts = {
+  provider: string;
+  outcome: "provider-breached" | "provider-cleared" | "no-majority";
+  recipient: "customer" | "provider";
+  amountLamports: number;
+  breachVotes: number;
+  reveals: number;
+};
+export async function explainRuling(input: RulingFacts, fetcher: typeof fetch = fetch) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
   const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
@@ -31,7 +36,7 @@ export async function explainRuling(
         systemInstruction: {
           parts: [
             {
-              text: "Explain this already-finalized localnet demo ruling in two sentences. It is an objective missed-deadline breach. Mention the refund and that the agent updates its future provider risk. You cannot decide votes, move money, or change protocol state. Do not imply production guarantees."
+              text: "Explain this already-finalized localnet demo ruling in two sentences, using only the supplied on-chain facts. The dispute concerns a missed delivery deadline. State the outcome, who received the escrowed lamports, and, if the provider breached, that the agent raises its future risk estimate for that provider. You cannot decide votes, move money, or change protocol state. Do not imply production guarantees."
             }
           ]
         },

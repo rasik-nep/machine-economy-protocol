@@ -1,8 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { scores, policy } from "./scenario.ts";
-import { learnFromBreach, type FailureEvidence } from "../../../packages/protocol/src/learning.ts";
+import {
+  learnFromBreach,
+  raiseRiskAfterBreach,
+  type FailureEvidence
+} from "../../../packages/protocol/src/learning.ts";
 import { sha256Hex, canonicalize } from "../../../packages/protocol/src/index.ts";
-import { explainRuling } from "./summary.ts";
+import { explainRuling, type RulingFacts } from "./summary.ts";
 const evidence: FailureEvidence = {
   kind: "mep.failure.v1",
   contract: "localnet-contract-1",
@@ -11,6 +15,14 @@ const evidence: FailureEvidence = {
   observedSlot: 101,
   reason: "controlled-preemption",
   resultSubmitted: false
+};
+const facts: RulingFacts = {
+  provider: "Provider X",
+  outcome: "provider-breached",
+  recipient: "customer",
+  amountLamports: 1,
+  breachVotes: 5,
+  reveals: 5
 };
 afterEach(() => vi.unstubAllEnvs());
 describe("Phase 10 economic learning regression", () => {
@@ -34,6 +46,24 @@ describe("Phase 10 economic learning regression", () => {
       expect(after.find((r) => r.providerId === initial.providerId)?.priceLamports).toBe(
         initial.priceLamports
       );
+  });
+  it("builds on earlier experience when the same provider breaches again", async () => {
+    const genesis = await sha256Hex("genesis");
+    const first = await learnFromBreach(genesis, await sha256Hex("ruling 1"), evidence, true);
+    const second = await learnFromBreach(
+      first.root,
+      await sha256Hex("ruling 2"),
+      { ...evidence, contract: "localnet-contract-2" },
+      true,
+      first.memory
+    );
+    expect(first.memory.checkpoint).toBe(1);
+    expect(first.memory.failureProbabilityOverridesBps).toEqual({ "provider-x": 2500 });
+    expect(second.memory.checkpoint).toBe(2);
+    expect(second.memory.previousRoot).toBe(first.root);
+    expect(second.memory.failureProbabilityOverridesBps).toEqual({ "provider-x": 5000 });
+    expect(raiseRiskAfterBreach(100)).toBe(2500);
+    expect(raiseRiskAfterBreach(9000)).toBe(10_000);
   });
   it("rejects unfinalized non-breach or evidence before the deadline", async () => {
     const root = await sha256Hex("memory");
@@ -63,10 +93,7 @@ describe("Gemini advisory boundary", () => {
         })
       )
     );
-    const result = await explainRuling(
-      { provider: "X", refundLamports: 1, breachVotes: 5 },
-      fetcher
-    );
+    const result = await explainRuling(facts, fetcher);
     expect(result).toEqual({ text: "Final explanation", model: "custom-model", advisory: true });
     expect(fetcher.mock.calls[0]?.[0]).toBe(
       "https://generativelanguage.googleapis.com/v1beta/models/custom-model:generateContent"
@@ -82,9 +109,7 @@ describe("Gemini advisory boundary", () => {
       const fetcher = vi
         .fn<typeof fetch>()
         .mockResolvedValue(new Response(JSON.stringify(body), { status }));
-      await expect(
-        explainRuling({ provider: "X", refundLamports: 1, breachVotes: 5 }, fetcher)
-      ).rejects.toThrow(message);
+      await expect(explainRuling(facts, fetcher)).rejects.toThrow(message);
     }
   });
   it("extracts text without executing model content or changing settlement", async () => {
@@ -101,13 +126,14 @@ describe("Gemini advisory boundary", () => {
         { status: 200 }
       )
     );
-    const input = { provider: "Provider X", refundLamports: 5000000, breachVotes: 5 };
+    const input = { ...facts, amountLamports: 5000000 };
     const result = await explainRuling(input, fetcher);
     expect(result.advisory).toBe(true);
     expect(result.text).toContain("Five votes");
-    expect(input.refundLamports).toBe(5000000);
+    expect(input.amountLamports).toBe(5000000);
     const body = fetcher.mock.calls[0]?.[1]?.body;
     expect(typeof body).toBe("string");
+    expect(body).toContain('\\"outcome\\":\\"provider-breached\\"');
     expect(body).toContain('"maxOutputTokens":1024');
     expect(body).toContain('"systemInstruction"');
     expect(fetcher.mock.calls[0]?.[0]).toContain("generativelanguage.googleapis.com");
@@ -117,23 +143,17 @@ describe("Gemini advisory boundary", () => {
   });
   it("reports quota failures, malformed responses, and missing keys", async () => {
     vi.stubEnv("GEMINI_API_KEY", "");
-    await expect(
-      explainRuling({ provider: "X", refundLamports: 1, breachVotes: 5 })
-    ).rejects.toThrow("not configured");
+    await expect(explainRuling(facts)).rejects.toThrow("not configured");
     vi.stubEnv("GEMINI_API_KEY", "unit-test-not-a-real-key");
     const quota = vi
       .fn<typeof fetch>()
       .mockResolvedValue(
         new Response(JSON.stringify({ error: { code: "insufficient_quota" } }), { status: 429 })
       );
-    await expect(
-      explainRuling({ provider: "X", refundLamports: 1, breachVotes: 5 }, quota)
-    ).rejects.toThrow("quota or rate limit");
+    await expect(explainRuling(facts, quota)).rejects.toThrow("quota or rate limit");
     const malformed = vi
       .fn<typeof fetch>()
       .mockResolvedValue(new Response(JSON.stringify({ candidates: [] })));
-    await expect(
-      explainRuling({ provider: "X", refundLamports: 1, breachVotes: 5 }, malformed)
-    ).rejects.toThrow("no summary");
+    await expect(explainRuling(facts, malformed)).rejects.toThrow("no summary");
   });
 });

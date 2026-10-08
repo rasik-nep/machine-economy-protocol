@@ -47,3 +47,4 @@ yarn-error.log*
 apps/web/public/app.js
 test-results/
 playwright-report/
+apps/web/public/site.js

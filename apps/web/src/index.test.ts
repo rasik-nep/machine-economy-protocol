@@ -57,6 +57,11 @@ describe("provider and model market screen model", () => {
     expect(page).toContain("offer-z-vision-dedicated");
     expect(page).toContain("Risk adjusted choice");
     expect(page).toContain("Expected failure loss");
+
+    const router = buildRouterScreenModel();
+    expect(router.baseline[0]?.providerId).toBe("provider-x");
+    expect(router.breachedProviderId).toBe("provider-x");
+    expect(router.riskUpdate[0]?.providerId).toBe("provider-z");
   });
 });
 
