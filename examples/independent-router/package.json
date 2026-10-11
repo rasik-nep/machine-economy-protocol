@@ -1,0 +1,7 @@
+{
+  "name": "@mep/independent-router",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Checks a published MEP precedent against the chain without trusting the demo server.",
+  "type": "module"
+}

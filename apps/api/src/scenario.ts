@@ -1,24 +1,30 @@
-import {
-  DEMO_AGENT_GENESIS_RISK_BPS,
-  DEMO_PROVIDERS,
-  DEMO_MODEL_INSTANCES,
-  DEMO_COMPUTE_OFFERS,
-  STOCK_MODEL_MANIFESTS,
-  STOCK_AGENT_MANIFESTS
-} from "../../../packages/fixtures/src/index.ts";
+import { STOCK_AGENT_MANIFESTS } from "../../../packages/fixtures/src/index.ts";
 import { rankComputeOffers } from "../../../packages/protocol/src/index.ts";
-// Prices and policy never change. The agent ranks offers with its own failure
-// estimates: genesis memory first, then whatever it learned from precedent.
-export const offers = DEMO_COMPUTE_OFFERS;
+import type { ChainMarket } from "../../../packages/protocol/src/chain-market.ts";
+import { tiersOf } from "../../../packages/protocol/src/trust.ts";
+
+// Prices and policy never change between jobs. The agent ranks the offers it reads
+// from the chain with its own memory: providers' published failure claims, overridden
+// only by precedents it has verified. Trust is priced from earned tiers, never from
+// providers' self-declared trust numbers.
 export const policy = STOCK_AGENT_MANIFESTS[0].policy;
-export function scores(learned: Record<string, number> = {}) {
+export const REQUIRED_CAPABILITIES = ["evidence-summary"] as const;
+
+export function rankMarket(market: ChainMarket, learned: Readonly<Record<string, number>> = {}) {
+  // Experience about a provider with no current offer has nothing to re-rank.
+  const listed = new Set(market.providers.map((provider) => provider.id));
   return rankComputeOffers({
-    providers: DEMO_PROVIDERS,
-    modelInstances: DEMO_MODEL_INSTANCES,
-    offers,
-    stockModels: STOCK_MODEL_MANIFESTS,
+    providers: market.providers,
+    modelInstances: market.modelInstances,
+    offers: market.offers,
+    stockModels: market.stockModels,
     policy,
-    requiredCapabilities: ["evidence-summary"],
-    failureProbabilityOverridesBps: { ...DEMO_AGENT_GENESIS_RISK_BPS, ...learned }
+    requiredCapabilities: REQUIRED_CAPABILITIES,
+    trustTiers: Object.fromEntries(
+      Object.entries(market.trust).map(([offer, trust]) => [offer, tiersOf(trust)])
+    ),
+    failureProbabilityOverridesBps: Object.fromEntries(
+      Object.entries(learned).filter(([provider]) => listed.has(provider))
+    )
   });
 }

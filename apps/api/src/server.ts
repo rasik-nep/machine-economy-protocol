@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { z } from "zod";
-import { DemoChain, describeError } from "./chain.ts";
+import { ActiveEscrowError, DemoChain, describeError } from "./chain.ts";
 import { explainRuling } from "./summary.ts";
 import { pageForPath } from "../../web/src/site.ts";
 export const json = (data: unknown) =>
@@ -56,7 +56,7 @@ export function createDemoServer(chain: DemoChain) {
         req.method !== "POST" ||
         ![
           "/demo/next",
-          "/demo/preempt",
+          "/demo/degrade",
           "/demo/resolve",
           "/demo/reset",
           "/demo/run",
@@ -81,7 +81,7 @@ export function createDemoServer(chain: DemoChain) {
       for await (const chunk of req) {
         body += String(chunk);
         if (body.length > 1024) {
-          res.writeHead(413);
+          res.writeHead(413, { Connection: "close" });
           res.end(json({ error: "Request too large" }));
           return;
         }
@@ -97,14 +97,15 @@ export function createDemoServer(chain: DemoChain) {
         );
         return;
       }
-      if (path === "/demo/preempt" && chain.stage !== 1) {
+      // The controlled provider fault: the selected host's serving is degraded.
+      if (path === "/demo/degrade" && chain.stage !== 1) {
         res.writeHead(409);
-        res.end(json({ error: "Only running work can be preempted" }));
+        res.end(json({ error: "Degraded serving can be triggered only for the first job" }));
         return;
       }
       if (path === "/demo/resolve" && chain.stage !== 2) {
         res.writeHead(409);
-        res.end(json({ error: "Failure evidence is required" }));
+        res.end(json({ error: "A failed verification is required" }));
         return;
       }
       if (path === "/demo/summary" && chain.stage < 6) {
@@ -128,7 +129,7 @@ export function createDemoServer(chain: DemoChain) {
         res.end(json({ ...(await chain.snapshot()), busy: false, error: null }));
       } catch (error) {
         lastError = describeError(error);
-        res.writeHead(500);
+        res.writeHead(error instanceof ActiveEscrowError ? 409 : 500);
         res.end(json({ error: lastError }));
       } finally {
         busy = false;

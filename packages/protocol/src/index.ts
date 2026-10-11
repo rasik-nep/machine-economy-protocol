@@ -3,6 +3,29 @@ export const DEFAULT_CLUSTER = "localnet";
 export { rankComputeOffers, RESERVATION_RISK_BPS } from "./router.ts";
 export type { UtilityBreakdown, UtilityRouterInput } from "./router.ts";
 export { calculateAgentMarginLamports } from "./subcontract.ts";
+export { agentProfitAndLoss } from "./pnl.ts";
+export type { PnlContract, PnlLine, ProfitAndLoss } from "./pnl.ts";
+export { canonicalize, sha256Hex, type HashHex } from "./hash.ts";
+import { canonicalize, sha256Hex, type HashHex } from "./hash.ts";
+import type { VerificationPolicy } from "./verifier.ts";
+export type {
+  CanaryChallenge,
+  CanaryPool,
+  ResultDocument,
+  TaskInput,
+  VerificationPolicy,
+  VerificationResult
+} from "./verifier.ts";
+export type { ExecutionReceipt, ReceiptSignerRole } from "./receipt.ts";
+export { TIER_TRUST_BPS, offerTrust, tiersOf } from "./trust.ts";
+export type {
+  ExecutionTier,
+  HardwareTier,
+  ModelTier,
+  OfferTrust,
+  TrustLabel,
+  TrustTiers
+} from "./trust.ts";
 
 export type DemoLoopStage =
   | "foundation-registry"
@@ -30,8 +53,6 @@ export const MVP_DEMO_LOOP: readonly DemoLoopStage[] = [
   "memory-update",
   "second-job"
 ] as const;
-
-export type HashHex = `sha256:${string}`;
 
 export type ReservationClass = "spot" | "reserved" | "dedicated";
 
@@ -66,11 +87,13 @@ export type DemoContractTerms = {
     readonly kind: "evidence-summary" | "ocr-extraction";
     readonly inputRoot: HashHex;
   };
-  readonly verificationRule: {
-    readonly kind: "customer-attested-result-root";
-  };
+  readonly verificationRule:
+    | { readonly kind: "customer-attested-result-root" }
+    // Compute jobs commit the whole verification policy: checker code, canary
+    // sampling, task checks, and threshold. A failed check supports a dispute.
+    | VerificationPolicy;
   readonly liabilityRule: {
-    readonly kind: "missed-deadline-provider-liability";
+    readonly kind: "missed-deadline-provider-liability" | "verifier-breach-provider-liability";
     readonly limitLamports: number;
   };
 };
@@ -115,18 +138,6 @@ export type VerifiedManifest<TManifest extends FoundationManifest> = {
   readonly isVerified: true;
 };
 
-export function canonicalize(value: unknown): string {
-  return JSON.stringify(sortForCanonicalJson(value));
-}
-
-export async function sha256Hex(value: string): Promise<HashHex> {
-  const encoded = new TextEncoder().encode(value);
-  const digest = await crypto.subtle.digest("SHA-256", encoded);
-  return `sha256:${Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0")
-  ).join("")}`;
-}
-
 export async function manifestRoot(manifest: FoundationManifest): Promise<HashHex> {
   return sha256Hex(canonicalize(manifest));
 }
@@ -148,22 +159,4 @@ export async function verifyManifest<TManifest extends FoundationManifest>(
     manifestRoot: actualRoot,
     isVerified: true
   };
-}
-
-function sortForCanonicalJson(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map((item) => sortForCanonicalJson(item));
-  }
-
-  if (value === null || typeof value !== "object") {
-    return value;
-  }
-
-  return Object.fromEntries(
-    Object.entries(value)
-      // Code-unit order (as in RFC 8785), never locale collation, so every runtime
-      // and language computes the same roots.
-      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
-      .map(([key, item]) => [key, sortForCanonicalJson(item)])
-  );
 }

@@ -1,3 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+# Anchor still requests toml 3; v4 preserves parse() and fixes unsafe parsing.
+# web3.js still requests jayson 4; v5 preserves its browser RPC client and removes
+# the vulnerable uuid and stream-json dependencies. Keep these scoped to the SDKs.
+overrides:
+  "@coral-xyz/anchor>toml": "4.2.0"
+  "@solana/web3.js>jayson": "5.0.0"

@@ -1,8 +1,11 @@
+import { readFile } from "node:fs/promises";
 import {
-  DEMO_AGENT_GENESIS_RISK_BPS,
+  DEMO_CANARY_COUNT,
+  DEMO_CANARY_POOLS,
   DEMO_COMPUTE_OFFERS,
-  DEMO_CONTRACT_TERMS,
+  DEMO_EXAMPLE_CANARY_SEED,
   DEMO_MODEL_INSTANCES,
+  DEMO_OFFER_TRUST,
   DEMO_PARENT_AGENT_SERVICE_PRICE_LAMPORTS,
   DEMO_PROVIDERS,
   DEMO_RESULT_ROOT,
@@ -10,7 +13,8 @@ import {
   DEMO_SUBCONTRACT_PRICE_LAMPORTS,
   DEMO_SUBCONTRACT_TERMS,
   STOCK_AGENT_MANIFESTS,
-  STOCK_MODEL_MANIFESTS
+  STOCK_MODEL_MANIFESTS,
+  demoComputeTerms
 } from "@mep/fixtures";
 import {
   type ComputeOfferMarketRecord,
@@ -18,15 +22,22 @@ import {
   type FoundationManifest,
   type HashHex,
   type ModelInstanceMarketRecord,
+  type OfferTrust,
   type ProviderMarketRecord,
   type UtilityBreakdown,
   calculateAgentMarginLamports,
   manifestRoot,
   rankComputeOffers,
   sha256Hex,
-  canonicalize
+  canonicalize,
+  tiersOf
 } from "@mep/protocol";
 import { raiseRiskAfterBreach } from "../../../packages/protocol/src/learning.ts";
+import {
+  buildVerificationPolicy,
+  checkerCodeRoot,
+  seedCommitment
+} from "../../../packages/protocol/src/verifier.ts";
 
 export const APP_NAME = "Machine Economy Protocol";
 export const FIRST_UI_MODE = "guided-judge-demo";
@@ -56,6 +67,8 @@ export type MarketScreenModel = {
     readonly stockModelRoot: HashHex;
   })[];
   readonly offers: readonly ComputeOfferMarketRecord[];
+  /** Earned trust per offer. Fixture hardware tiers are labeled simulated. */
+  readonly trust: Readonly<Record<string, OfferTrust>>;
 };
 
 export type RouterScreenModel = {
@@ -68,7 +81,7 @@ export type RouterScreenModel = {
 
 export type ContractFlowStep = {
   readonly status: "Draft" | "Funded" | "Running" | "Submitted" | "Verified" | "Settled";
-  readonly actor: "Customer" | "Provider";
+  readonly actor: "Customer" | "Provider" | "Anyone";
   readonly escrowLamports: number;
   readonly detail: string;
 };
@@ -171,12 +184,13 @@ export async function buildMarketScreenModel(): Promise<MarketScreenModel> {
         throw new Error(`Unknown model instance: ${offer.modelInstanceId}`);
       }
       return offer;
-    })
+    }),
+    trust: DEMO_OFFER_TRUST
   };
 }
 
-// Mirrors the live localnet demo: the agent ranks offers with its genesis memory,
-// the first winner breaches, and the learned estimate changes the next choice.
+// Mirrors the live demo: the agent starts by trusting providers' published failure
+// claims, the first winner breaches, and the learned estimate changes the next choice.
 export function buildRouterScreenModel(): RouterScreenModel {
   const agent = STOCK_AGENT_MANIFESTS[0];
   const input = {
@@ -186,7 +200,9 @@ export function buildRouterScreenModel(): RouterScreenModel {
     stockModels: STOCK_MODEL_MANIFESTS,
     policy: agent.policy,
     requiredCapabilities: ["evidence-summary"],
-    failureProbabilityOverridesBps: DEMO_AGENT_GENESIS_RISK_BPS
+    trustTiers: Object.fromEntries(
+      Object.entries(DEMO_OFFER_TRUST).map(([offer, trust]) => [offer, tiersOf(trust)])
+    )
   };
   const baseline = rankComputeOffers(input);
   const breached = baseline[0];
@@ -200,10 +216,7 @@ export function buildRouterScreenModel(): RouterScreenModel {
     riskUpdate: rankComputeOffers({
       ...input,
       failureProbabilityOverridesBps: {
-        ...DEMO_AGENT_GENESIS_RISK_BPS,
-        [breached.providerId]: raiseRiskAfterBreach(
-          DEMO_AGENT_GENESIS_RISK_BPS[breached.providerId]
-        )
+        [breached.providerId]: raiseRiskAfterBreach(undefined)
       }
     })
   };
@@ -215,7 +228,16 @@ export async function buildContractFlowScreenModel(): Promise<ContractFlowScreen
   const offer = DEMO_COMPUTE_OFFERS.find((item) => item.id === winner.offerId);
   if (!offer) throw new Error(`Selected offer missing: ${winner.offerId}`);
   const price = offer.priceLamports;
-  if (DEMO_CONTRACT_TERMS.liabilityRule.limitLamports > price) {
+  // An example policy for this static page. Live jobs commit a fresh random seed.
+  const terms = demoComputeTerms(
+    await buildVerificationPolicy({
+      codeRoot: await checkerCodeRoot((path) => readFile(path, "utf8")),
+      pool: DEMO_CANARY_POOLS[0],
+      canaryCount: DEMO_CANARY_COUNT,
+      seedCommitment: await seedCommitment(DEMO_EXAMPLE_CANARY_SEED)
+    })
+  );
+  if (terms.liabilityRule.limitLamports > price) {
     throw new Error("Demo liability limit exceeds the selected offer price");
   }
 
@@ -225,11 +247,11 @@ export async function buildContractFlowScreenModel(): Promise<ContractFlowScreen
     customerAgentName: STOCK_AGENT_MANIFESTS[0].displayName,
     priceLamports: price,
     deadlineOffsetSlots: 1_000,
-    taskRoot: await sha256Hex(canonicalize(DEMO_CONTRACT_TERMS.task)),
-    verificationRuleRoot: await sha256Hex(canonicalize(DEMO_CONTRACT_TERMS.verificationRule)),
-    liabilityRuleRoot: await sha256Hex(canonicalize(DEMO_CONTRACT_TERMS.liabilityRule)),
+    taskRoot: await sha256Hex(canonicalize(terms.task)),
+    verificationRuleRoot: await sha256Hex(canonicalize(terms.verificationRule)),
+    liabilityRuleRoot: await sha256Hex(canonicalize(terms.liabilityRule)),
     resultRoot: DEMO_RESULT_ROOT,
-    terms: DEMO_CONTRACT_TERMS,
+    terms,
     steps: [
       {
         status: "Draft",
@@ -253,17 +275,19 @@ export async function buildContractFlowScreenModel(): Promise<ContractFlowScreen
         status: "Submitted",
         actor: "Provider",
         escrowLamports: price,
-        detail: "Commit a non-zero result root before the deadline."
+        detail:
+          "Commit the result root, including canary answers, and sign a receipt before the deadline."
       },
       {
         status: "Verified",
         actor: "Customer",
         escrowLamports: price,
-        detail: "Customer attests the submitted result."
+        detail:
+          "Customer checks the provider-signed receipt, scores the task output and drawn canaries under the committed policy, then attests."
       },
       {
         status: "Settled",
-        actor: "Customer",
+        actor: "Anyone",
         escrowLamports: 0,
         detail: "Transfer the escrowed price to the provider."
       }

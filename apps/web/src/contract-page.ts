@@ -13,6 +13,13 @@ function escapeHtml(value: string | number): string {
   });
 }
 
+/** One line describing the committed verification rule. */
+function verificationSummary(contract: ContractFlowScreenModel): string {
+  const rule = contract.terms.verificationRule;
+  if (rule.kind !== "mep.verification-policy.v1") return "Customer-attested result root";
+  return `Policy: task checks + ${String(rule.sampling.canaryCount)} canaries from ${rule.sampling.poolId}, pass at ${String(rule.thresholdBps / 100)}% (${rule.checker.name}@${rule.checker.version})`;
+}
+
 export function renderContractPage(contract: ContractFlowScreenModel): string {
   const steps = contract.steps
     .map(
@@ -39,17 +46,17 @@ ol{list-style:none;padding:0;margin:24px 0;display:grid;grid-template-columns:re
 @media(max-width:800px){.summary{grid-template-columns:repeat(2,1fr)}ol{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.summary,.roots,ol{grid-template-columns:1fr}}
 </style></head><body><main>
 <div class="eyebrow">Machine Economy Protocol / Demo stage 06</div><h1>Work contract and escrow</h1>
-<p class="intro">The procurement agent selects a provider offer, commits the job terms, funds the contract in SOL, and releases payment only after the customer verifies a submitted result.</p>
+<p class="intro">The procurement agent selects a provider offer, commits the job terms, funds the contract in SOL, and releases payment after the customer verifies a submitted result, or after the review window closes without a dispute.</p>
 <div class="summary"><div><span class="label">Customer agent</span><div class="value">${escapeHtml(contract.customerAgentName)}</div></div>
 <div><span class="label">Provider</span><div class="value">${escapeHtml(contract.providerId)}</div></div>
 <div><span class="label">Selected offer</span><div class="value">${escapeHtml(contract.offerId)}</div></div>
 <div><span class="label">Quoted price</span><div class="value">${escapeHtml(contract.priceLamports.toLocaleString("en-US"))} lamports</div></div></div>
 <section><h2>Committed terms</h2><p>The task, verification rule, and liability rule stay off-chain as structured data. Their SHA-256 roots are stored in the contract account. The deadline is set ${escapeHtml(contract.deadlineOffsetSlots)} slots after creation in this example.</p>
 <div class="roots"><div class="root"><span class="label">Task</span><strong>Evidence summary</strong><code>${escapeHtml(contract.taskRoot)}</code></div>
-<div class="root"><span class="label">Verification</span><strong>Customer attests result root</strong><code>${escapeHtml(contract.verificationRuleRoot)}</code></div>
-<div class="root"><span class="label">Liability</span><strong>Missed deadline · limit ${escapeHtml(contract.terms.liabilityRule.limitLamports.toLocaleString("en-US"))} lamports</strong><code>${escapeHtml(contract.liabilityRuleRoot)}</code></div>
+<div class="root"><span class="label">Verification</span><strong>${escapeHtml(verificationSummary(contract))}</strong><code>${escapeHtml(contract.verificationRuleRoot)}</code></div>
+<div class="root"><span class="label">Liability</span><strong>Verifier breach · limit ${escapeHtml(contract.terms.liabilityRule.limitLamports.toLocaleString("en-US"))} lamports</strong><code>${escapeHtml(contract.liabilityRuleRoot)}</code></div>
 <div class="root"><span class="label">Submitted result</span><strong>Result commitment</strong><code>${escapeHtml(contract.resultRoot)}</code></div></div></section>
 <section><h2>Contract lifecycle</h2><p>Each transition is a separate Anchor instruction with signer and status checks.</p><ol>${steps}</ol></section>
-<div class="note">This is a deterministic flow preview. LiteSVM tests execute the real instructions and check exact escrow balances. The page does not read live localnet accounts. A missed deadline is resolved by the jury dispute, and an unverified result is released to the provider after the customer review window.</div>
+<div class="note">This is a deterministic flow preview. LiteSVM tests execute the real instructions and check exact escrow balances. The page does not read live localnet accounts. A result that fails its verification policy supports a dispute: it is disputed inside the review window and resolved by the jury, and an unverified result is released to the provider after the customer review window.</div>
 </main></body></html>`;
 }

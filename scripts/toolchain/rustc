@@ -5,4 +5,12 @@ if [ -n "${RUSTUP_TOOLCHAIN:-}" ]; then
   exec rustup run "$RUSTUP_TOOLCHAIN" rustc "$@"
 fi
 
-exec /opt/homebrew/bin/rustc "$@"
+# Prefer Homebrew's toolchain where it exists; otherwise use the next one on PATH,
+# skipping this shim directory so the call cannot recurse.
+self_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+if [ -x "/opt/homebrew/bin/rustc" ]; then
+  exec "/opt/homebrew/bin/rustc" "$@"
+fi
+PATH="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$self_dir" | paste -sd: -)"
+export PATH
+exec rustc "$@"

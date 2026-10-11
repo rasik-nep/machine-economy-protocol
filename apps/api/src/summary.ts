@@ -36,7 +36,7 @@ export async function explainRuling(input: RulingFacts, fetcher: typeof fetch = 
         systemInstruction: {
           parts: [
             {
-              text: "Explain this already-finalized localnet demo ruling in two sentences, using only the supplied on-chain facts. The dispute concerns a missed delivery deadline. State the outcome, who received the escrowed lamports, and, if the provider breached, that the agent raises its future risk estimate for that provider. You cannot decide votes, move money, or change protocol state. Do not imply production guarantees."
+              text: "Explain this already-finalized demo ruling in two sentences, using only the supplied on-chain facts. The dispute concerns a provider-signed result that failed the deterministic verification policy committed in the contract (task-output checks and sampled canary prompts), which indicates degraded serving; do not name a cause. State the outcome, who received the escrowed lamports, and, if the provider breached, that the agent raises its future risk estimate for that provider. You cannot decide votes, move money, or change protocol state. Do not imply production guarantees."
             }
           ]
         },

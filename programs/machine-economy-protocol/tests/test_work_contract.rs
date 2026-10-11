@@ -1383,3 +1383,70 @@ fn submitted_result_is_disputable_only_inside_review_window() {
     assert!(f.state().status == ContractStatus::Breached);
     assert_eq!(f.breach_count(), 1);
 }
+
+#[test]
+fn four_to_one_split_on_submitted_result_breaches_and_publishes_tally() {
+    use machine_economy_protocol::{
+        accounts as a, constants::PRECEDENT_RECORD_SEED, instruction as i, state::PrecedentRecord,
+    };
+    // The demo's quality breach: the provider delivers on time, the customer's
+    // spot-check fails, and one of five jurors dissents.
+    let mut f = Fixture::new();
+    let customer = Keypair::new_from_array(f.customer.to_bytes()[..32].try_into().unwrap());
+    let provider = Keypair::new_from_array(f.provider.to_bytes()[..32].try_into().unwrap());
+    f.create([20; 32], 100).unwrap();
+    f.fund(&customer).unwrap();
+    f.start(&provider).unwrap();
+    f.submit(&provider, [30; 32]).unwrap();
+    let jurors = f.jurors();
+    // Disputing before the deadline is rejected even with a submitted result.
+    let early = f.open_dispute(&customer, &jurors, 200, 300).unwrap_err();
+    assert_mep_error(early, MepError::InvalidDeadline);
+    f.svm.warp_to_slot(101);
+    f.open_dispute(&customer, &jurors, 200, 300).unwrap();
+    let votes = [1, 1, 1, 1, 2];
+    for (j, vote) in jurors.iter().zip(votes) {
+        f.commit_vote(j, vote).unwrap();
+    }
+    f.svm.warp_to_slot(201);
+    for (j, vote) in jurors.iter().zip(votes) {
+        f.reveal_vote(j, vote).unwrap();
+    }
+    f.svm.warp_to_slot(301);
+    let before = f.svm.get_account(&customer.pubkey()).unwrap().lamports;
+    f.finalize(&provider, Some(f.provider_record)).unwrap();
+    assert_eq!(
+        f.svm.get_account(&customer.pubkey()).unwrap().lamports - before,
+        8_000_000
+    );
+    assert!(f.state().status == ContractStatus::Breached);
+    assert_eq!(f.state().result_root, [30; 32]);
+    assert_eq!(f.breach_count(), 1);
+
+    let id = machine_economy_protocol::id();
+    let dispute = f.dispute();
+    let precedent = Pubkey::find_program_address(&[PRECEDENT_RECORD_SEED, dispute.as_ref()], &id).0;
+    let publish = ix(
+        i::PublishPrecedent {},
+        a::PublishPrecedent {
+            payer: customer.pubkey(),
+            dispute,
+            work_contract: f.contract,
+            precedent,
+            system_program: system_program::ID,
+        },
+    );
+    send(&mut f.svm, &customer, publish).unwrap();
+    let account = f.svm.get_account(&precedent).unwrap();
+    let p = PrecedentRecord::try_deserialize(&mut account.data.as_slice()).unwrap();
+    assert_eq!(
+        p.ruling_root,
+        solana_sha256_hasher::hashv(&[
+            b"mep.precedent.v1",
+            dispute.as_ref(),
+            &[77; 32],
+            &[1, 4, 5, 0]
+        ])
+        .to_bytes()
+    );
+}

@@ -36,10 +36,21 @@ step is customer attestation of the submitted root; the program does not
 inspect private output or evaluate the off-chain verification rule. No LLM can
 release funds.
 
+In the demo, compute jobs commit a `mep.verification-policy.v1` as the
+verification rule: the checker's code root, the canary pool root and a seed
+commitment, the task checks, and a pass threshold. The delivered result document
+holds the task output and the answers to the drawn canaries, and its hash is the
+on-chain result root. The provider also signs a `mep.receipt.v1` with its
+provider authority key. Before verifying, the customer checks the receipt, then
+scores the task output against the task input and the canaries with tolerance
+for formatting. A failed check supports a dispute inside the review window, and
+the receipt, policy, and scores become the evidence. See
+[verification.md](verification.md).
+
 A silent customer cannot lock the provider's payment. If the customer neither
 verifies nor disputes a submitted result within `REVIEW_WINDOW_SLOTS` after the
-deadline, anyone can call `release_unverified` to pay the provider. Missed
-deadlines go to the jury dispute; a hung jury refunds the customer. A contract
+deadline, anyone can call `release_unverified` to pay the provider. Failed
+verifications and missed deadlines go to the jury dispute; a hung jury refunds the customer. A contract
 that is funded but never started still needs a dispute (co-signed by the demo
 authority) to refund. Use disposable localnet wallets only.
 

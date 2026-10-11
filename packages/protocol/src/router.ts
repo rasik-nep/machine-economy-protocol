@@ -6,6 +6,7 @@ import type {
   StockAgentManifest,
   StockModelManifest
 } from "./index.js";
+import { TIER_TRUST_BPS, UNVERIFIED_TRUST, tiersOf, type TrustTiers } from "./trust.ts";
 
 export const RESERVATION_RISK_BPS: Readonly<Record<ReservationClass, number>> = {
   spot: 200,
@@ -18,6 +19,7 @@ export type UtilityBreakdown = {
   readonly providerId: string;
   readonly modelInstanceId: string;
   readonly stockModelId: string;
+  readonly trust: TrustTiers;
   readonly effectiveFailureProbabilityBps: number;
   readonly trustDeficitBps: number;
   readonly priceLamports: bigint;
@@ -36,6 +38,11 @@ export type UtilityRouterInput = {
   readonly policy: StockAgentManifest["policy"];
   readonly requiredCapabilities: readonly string[];
   readonly failureProbabilityOverridesBps?: Readonly<Record<string, number>>;
+  /**
+   * Earned trust tiers per offer id. An offer without an entry is priced as
+   * H0/M0/E0. Providers' self-declared trust numbers are never scored.
+   */
+  readonly trustTiers?: Readonly<Record<string, TrustTiers>>;
 };
 
 const BPS = 10_000n;
@@ -57,6 +64,12 @@ function asPositiveInteger(value: number, label: string): bigint {
   const integer = asSafeNonnegativeInteger(value, label);
   if (integer === 0n) throw new Error(`${label} must be greater than zero`);
   return integer;
+}
+
+function tierBps(table: Readonly<Record<string, number>>, tier: string, label: string): bigint {
+  const value = Object.hasOwn(table, tier) ? table[tier] : undefined;
+  if (value === undefined) throw new Error(`Unknown ${label} trust tier: ${tier}`);
+  return BigInt(value);
 }
 
 function ceilDivide(numerator: bigint, denominator: bigint): bigint {
@@ -100,13 +113,23 @@ export function rankComputeOffers(input: UtilityRouterInput): readonly UtilityBr
       "failureProbabilityBps"
     );
     const override = input.failureProbabilityOverridesBps?.[provider.id];
-    const effectiveFailureProbability =
+    const learnedFailureProbability =
       override === undefined
         ? publishedFailureProbability
         : asBasisPoints(override, `failureProbabilityOverridesBps.${provider.id}`);
-    const hardwareTrust = asBasisPoints(provider.hardwareTrustBps, "hardwareTrustBps");
-    const modelTrust = asBasisPoints(instance.modelTrustBps, "modelTrustBps");
-    const executionTrust = asBasisPoints(provider.executionTrustBps, "executionTrustBps");
+    // A breach-derived estimate is a risk floor, never a discount on published risk.
+    const effectiveFailureProbability =
+      learnedFailureProbability > publishedFailureProbability
+        ? learnedFailureProbability
+        : publishedFailureProbability;
+    const earned =
+      input.trustTiers && Object.hasOwn(input.trustTiers, offer.id)
+        ? input.trustTiers[offer.id]
+        : undefined;
+    const trust = earned ?? tiersOf(UNVERIFIED_TRUST);
+    const hardwareTrust = tierBps(TIER_TRUST_BPS.hardware, trust.hardware, "hardware");
+    const modelTrust = tierBps(TIER_TRUST_BPS.model, trust.model, "model");
+    const executionTrust = tierBps(TIER_TRUST_BPS.execution, trust.execution, "execution");
     if (!Object.hasOwn(RESERVATION_RISK_BPS, offer.reservationClass)) {
       throw new Error(`Unknown reservation class: ${offer.reservationClass}`);
     }
@@ -130,6 +153,7 @@ export function rankComputeOffers(input: UtilityRouterInput): readonly UtilityBr
       providerId: provider.id,
       modelInstanceId: instance.id,
       stockModelId: model.id,
+      trust,
       effectiveFailureProbabilityBps: Number(effectiveFailureProbability),
       trustDeficitBps: Number(trustDeficit),
       priceLamports: price,

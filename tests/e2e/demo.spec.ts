@@ -4,23 +4,60 @@ const schema = z.object({
   stage: z.number(),
   run: z.number(),
   busy: z.boolean(),
-  before: z.array(z.object({ providerId: z.string() })),
-  after: z.array(z.object({ providerId: z.string() })),
+  network: z.string(),
+  before: z.array(z.object({ providerId: z.string(), providerSlug: z.string().optional() })),
+  after: z.array(z.object({ providerId: z.string(), providerSlug: z.string().optional() })),
+  choices: z.object({
+    agent: z.object({ before: z.string().nullable(), after: z.string().nullable() }),
+    twin: z.object({ before: z.string().nullable(), after: z.string().nullable() })
+  }),
   agent: z.object({
     checkpoints: z.number(),
     memoryRoot: z.string(),
-    initialMemoryRoot: z.string()
+    initialMemoryRoot: z.string(),
+    twinCheckpoints: z.number(),
+    twinMemoryRoot: z.string(),
+    twinInitialMemoryRoot: z.string()
   }),
+  pnl: z.object({ totalLamports: z.string(), withoutRefundsLamports: z.string() }),
+  verifications: z.object({
+    first: z
+      .object({
+        result: z.object({ passed: z.boolean(), scoreBps: z.number() }),
+        receipt: z.object({ label: z.string(), signerRole: z.string() }),
+        executionTrust: z.object({ tier: z.string() })
+      })
+      .optional(),
+    second: z
+      .object({
+        result: z.object({ passed: z.boolean(), scoreBps: z.number() }),
+        receipt: z.object({ label: z.string(), signerRole: z.string() }),
+        executionTrust: z.object({ tier: z.string() })
+      })
+      .optional()
+  }),
+  evidenceBundle: z.string().optional(),
+  precedent: z.object({ rulingRoot: z.string(), url: z.string() }).optional(),
   contracts: z.array(
     z.object({ escrowLamports: z.number(), priceLamports: z.number(), status: z.string() })
   ),
-  providers: z.array(z.object({ id: z.string(), breachCount: z.number() })),
+  providers: z.array(
+    z.object({
+      id: z.string(),
+      breachCount: z.number(),
+      trust: z.object({
+        hardware: z.object({ tier: z.string(), status: z.string() }),
+        model: z.object({ tier: z.string(), status: z.string() }),
+        execution: z.object({ tier: z.string(), status: z.string() })
+      })
+    })
+  ),
   ruling: z
     .object({ outcome: z.string(), recipient: z.string(), breachVotes: z.number() })
     .optional(),
-  votes: z.array(z.object({ revealed: z.boolean() })),
+  votes: z.array(z.object({ revealed: z.boolean(), vote: z.string().nullable() })),
   rulingRoot: z.string().optional(),
-  receipts: z.array(z.object({ signature: z.string() }))
+  receipts: z.array(z.object({ signature: z.string(), url: z.string() }))
 });
 test("real localnet loop, repeatability, API guards, and responsive navigation", async ({
   page,
@@ -35,7 +72,7 @@ test("real localnet loop, repeatability, API guards, and responsive navigation",
     current = schema.parse(await reset.json());
   }
   expect(current.stage).toBe(0);
-  const premature = await request.post("/demo/preempt", { data: { run: current.run, stage: 0 } });
+  const premature = await request.post("/demo/degrade", { data: { run: current.run, stage: 0 } });
   expect(premature.status()).toBe(409);
   const crossOrigin = await request.post("/demo/run", {
     headers: { Origin: "https://untrusted.example" },
@@ -55,16 +92,64 @@ test("real localnet loop, repeatability, API guards, and responsive navigation",
   });
   current = schema.parse(await (await request.get("/api/state")).json());
   expect(current.stage).toBe(8);
-  expect(current.before[0]?.providerId).toBe("provider-x");
-  expect(current.after[0]?.providerId).toBe("provider-z");
+  // Ranked from on-chain offers; the precedent, not the fixtures, changes the choice.
+  expect(current.before[0]?.providerSlug).toBe("provider-x");
+  expect(current.after[0]?.providerSlug).toBe("provider-z");
   expect(current.agent.checkpoints).toBe(1);
   expect(current.agent.memoryRoot).not.toBe(current.agent.initialMemoryRoot);
+  // The twin was never party to the dispute, yet it verified the precedent and switched.
+  expect(current.choices.twin).toEqual({ before: "Provider X", after: "Provider Z" });
+  expect(current.choices.agent).toEqual({ before: "Provider X", after: "Provider Z" });
+  expect(current.agent.twinCheckpoints).toBe(1);
+  expect(current.agent.twinMemoryRoot).not.toBe(current.agent.twinInitialMemoryRoot);
+  expect(current.agent.twinMemoryRoot).not.toBe(current.agent.memoryRoot);
+  // Item 1/2: the degraded result fails its committed policy with a provider-signed
+  // receipt (E1); the second job passes (E2).
+  expect(current.verifications.first?.result.passed).toBe(false);
+  expect(current.verifications.first?.receipt).toMatchObject({
+    label: "provider-signed",
+    signerRole: "provider"
+  });
+  expect(current.verifications.first?.executionTrust.tier).toBe("E1");
+  expect(current.verifications.second?.result.passed).toBe(true);
+  expect(current.verifications.second?.executionTrust.tier).toBe("E2");
+  expect(current.evidenceBundle).toMatch(/evidence-bundle\.json$/);
+  // Item 4: fixture hardware tiers are labeled simulated; model identity is earned.
+  expect(current.providers.find((p) => p.id === "provider-z")?.trust.hardware).toMatchObject({
+    tier: "H3",
+    status: "simulated"
+  });
+  expect(current.providers.find((p) => p.id === "provider-x")?.trust.hardware.status).toBe(
+    "unverified"
+  );
+  expect(current.providers.every((p) => p.trust.model.tier === "M2")).toBe(true);
   expect(current.contracts).toHaveLength(4);
   expect(current.contracts.every((c) => c.escrowLamports === 0)).toBe(true);
-  expect(current.contracts.filter((c) => c.status === "settled")).toHaveLength(3);
+  expect(current.contracts.map((c) => c.status)).toEqual([
+    "settled",
+    "settled",
+    "breached",
+    "settled"
+  ]);
+  expect(current.pnl).toEqual({
+    ...current.pnl,
+    totalLamports: "1000000",
+    withoutRefundsLamports: "-4000000"
+  });
   expect(current.votes.filter((v) => v.revealed)).toHaveLength(5);
+  expect(current.votes.map((v) => v.vote)).toEqual([
+    "breach",
+    "breach",
+    "breach",
+    "breach",
+    "no breach"
+  ]);
   expect(current.rulingRoot).toMatch(/^sha256:[a-f0-9]{64}$/);
+  expect(current.precedent?.rulingRoot).toBe(current.rulingRoot);
   expect(current.receipts.length).toBeGreaterThan(30);
+  expect(current.receipts.every((r) => r.url.startsWith("https://explorer.solana.com/tx/"))).toBe(
+    true
+  );
   await page.screenshot({ path: "test-results/dashboard-complete.png", fullPage: true });
   await page.getByRole("link", { name: /Compute market/ }).click();
   await expect(page.getByRole("heading", { name: "The price of reliability." })).toBeVisible();
@@ -74,8 +159,13 @@ test("real localnet loop, repeatability, API guards, and responsive navigation",
   await expect(
     page.getByRole("heading", { name: "Identity stays. Experience evolves." })
   ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Agent A′’s memory" })).toBeVisible();
   await page.getByRole("link", { name: /Dispute & precedent/ }).click();
   await expect(page.getByText("Provider breached", { exact: true })).toBeVisible();
+  await expect(page.getByText("Revealed · no breach")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Precedent account on Explorer ↗" })).toBeVisible();
+  await expect(page.getByText("provider-signed ·").first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Check it without this server" })).toBeVisible();
   await page.screenshot({ path: "test-results/dispute-complete.png", fullPage: true });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("link", { name: /Overview/ }).click();
@@ -105,24 +195,23 @@ test("guided steps, mid-run reset, and stale requests", async ({ page, request }
 
   await page.getByRole("button", { name: "Start first job", exact: true }).click();
   await stage("Work in progress");
-  // A run can be abandoned mid-dispute-window; the next run starts from fresh accounts.
+  // Active escrow prevents a reset from abandoning the current run.
   current = schema.parse(await (await request.get("/api/state")).json());
   const abandoned = current.run;
   const midReset = await request.post("/demo/reset", {
     data: { run: current.run, stage: current.stage }
   });
-  expect(midReset.ok()).toBe(true);
-  current = schema.parse(await midReset.json());
-  expect(current.stage).toBe(0);
-  expect(current.run).not.toBe(abandoned);
-  const stale = await request.post("/demo/next", { data: { run: abandoned, stage: 1 } });
+  expect(midReset.status()).toBe(409);
+  current = schema.parse(await (await request.get("/api/state")).json());
+  expect(current.stage).toBe(1);
+  expect(current.run).toBe(abandoned);
+  const stale = await request.post("/demo/next", { data: { run: abandoned - 1, stage: 1 } });
   expect(stale.status()).toBe(409);
 
   await page.reload();
-  await page.getByRole("button", { name: "Start first job", exact: true }).click();
   await stage("Work in progress");
-  await page.getByRole("button", { name: "Trigger provider failure", exact: true }).click();
-  await stage("Provider preempted");
+  await page.getByRole("button", { name: "Trigger degraded serving", exact: true }).click();
+  await stage("Verification failed");
   await page.getByRole("button", { name: "Resolve with jury", exact: true }).click();
   await stage("Ruling finalized");
   await page.getByRole("button", { name: "Publish & update memory", exact: true }).click();
@@ -134,7 +223,7 @@ test("guided steps, mid-run reset, and stale requests", async ({ page, request }
   expect(current.ruling).toMatchObject({
     outcome: "provider-breached",
     recipient: "customer",
-    breachVotes: 5
+    breachVotes: 4
   });
   expect(current.providers.find((p) => p.id === "provider-x")?.breachCount).toBe(
     breachesBefore + 1
@@ -142,5 +231,5 @@ test("guided steps, mid-run reset, and stale requests", async ({ page, request }
   expect(current.contracts[0]?.priceLamports).toBe(15_000_000);
   expect(current.contracts.every((c) => c.escrowLamports === 0)).toBe(true);
   await page.getByRole("link", { name: /Dispute & precedent/ }).click();
-  await expect(page.getByText("0.0050 SOL to customer", { exact: true })).toBeVisible();
+  await expect(page.getByText("0.005 SOL to customer", { exact: true })).toBeVisible();
 });

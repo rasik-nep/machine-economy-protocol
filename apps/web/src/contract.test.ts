@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DEMO_CONTRACT_TERMS } from "@mep/fixtures";
+import { DEMO_COMPUTE_LIABILITY, DEMO_COMPUTE_TASK } from "@mep/fixtures";
 import { canonicalize, sha256Hex } from "@mep/protocol";
 
 import { buildContractFlowScreenModel } from "./index.js";
@@ -13,13 +13,13 @@ describe("guided contract flow", () => {
     expect(flow.offerId).toBe("offer-x-ledger-spot");
     expect(flow.providerId).toBe("provider-x");
     expect(flow.priceLamports).toBe(5_000_000);
-    expect(flow.taskRoot).toBe(await sha256Hex(canonicalize(DEMO_CONTRACT_TERMS.task)));
+    expect(flow.taskRoot).toBe(await sha256Hex(canonicalize(DEMO_COMPUTE_TASK)));
+    // The verification rule is the whole committed policy: checker, sampling, threshold.
+    expect(flow.terms.verificationRule.kind).toBe("mep.verification-policy.v1");
     expect(flow.verificationRuleRoot).toBe(
-      await sha256Hex(canonicalize(DEMO_CONTRACT_TERMS.verificationRule))
+      await sha256Hex(canonicalize(flow.terms.verificationRule))
     );
-    expect(flow.liabilityRuleRoot).toBe(
-      await sha256Hex(canonicalize(DEMO_CONTRACT_TERMS.liabilityRule))
-    );
+    expect(flow.liabilityRuleRoot).toBe(await sha256Hex(canonicalize(DEMO_COMPUTE_LIABILITY)));
     expect(flow.steps.map((step) => step.status)).toEqual([
       "Draft",
       "Funded",

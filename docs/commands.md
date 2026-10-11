@@ -80,7 +80,9 @@ Run the linter:
 pnpm run lint
 ```
 
-Start a reset local Solana validator:
+Start a reset local Solana validator (an empty ledger without the program, for
+ad-hoc CLI work). Do not use it with `pnpm dev`, which starts its own validator
+with the program deployed; stop this one first:
 
 ```sh
 pnpm run localnet:start
@@ -107,4 +109,24 @@ Stop any separately started validator first: the demo validator deploys the
 program with the demo wallet as upgrade authority, which `initialize_protocol`
 requires. The Gemini test is an explicit live request using the ignored
 environment key; normal unit tests mock it.
+
+The validator must be able to listen on ports 8899, 8900 and 9900 (the faucet
+binds `0.0.0.0:9900` regardless of `--bind-address`). Sandboxed shells that
+block listening sockets make it exit immediately; `pnpm dev` then prints the
+validator's own error, such as `Unable to bind faucet ... Operation not
+permitted`. Run the command outside the sandbox.
 See [end-to-end-demo.md](end-to-end-demo.md) for the full workflow.
+
+## Independent precedent check
+
+After a run publishes a precedent, check it from the chain alone, without the
+demo server:
+
+```sh
+pnpm run router:verify --bundle .anchor/runs/localnet-<run>/evidence-bundle.json
+# Options: --rpc <url> (default SOLANA_RPC_URL or http://127.0.0.1:8899)
+#          --idl <path> (default target/idl/machine_economy_protocol.json)
+```
+
+It exits with status 1 if the bundle is missing, altered, or does not match the
+on-chain roots. See [verification.md](verification.md).

@@ -1,4 +1,4 @@
-import type { HashHex, StockAgentManifest, StockModelManifest } from "@mep/protocol";
+import type { StockAgentManifest, StockModelManifest } from "@mep/protocol";
 
 export const STOCK_MODEL_MANIFESTS = [
   {
@@ -47,8 +47,7 @@ export const STOCK_AGENT_MANIFESTS = [
       privacyWeightBps: 650
     },
     preferredCapabilities: ["invoice-reasoning", "contract-drafting"],
-    memoryTemplateHash:
-      "sha256:df08a750a4727e7783d3db20609e2a1f9a13a63496d44b0e3ad8f8c6255f6c2e" as HashHex
+    memoryTemplateHash: "sha256:df08a750a4727e7783d3db20609e2a1f9a13a63496d44b0e3ad8f8c6255f6c2e"
   },
   {
     kind: "mep.stock-agent.v1",
@@ -63,7 +62,6 @@ export const STOCK_AGENT_MANIFESTS = [
       privacyWeightBps: 400
     },
     preferredCapabilities: ["ocr", "receipt-extraction"],
-    memoryTemplateHash:
-      "sha256:a0ecf2699f5d739792cde833a2ab0e685248b1e6d95b3f2296e6d084f9a31a27" as HashHex
+    memoryTemplateHash: "sha256:a0ecf2699f5d739792cde833a2ab0e685248b1e6d95b3f2296e6d084f9a31a27"
   }
 ] as const satisfies readonly StockAgentManifest[];

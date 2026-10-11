@@ -1141,6 +1141,37 @@ details p {
   background: #f3f4ef;
   border-color: var(--line);
 }
+/* Earned H/M/E trust tiers. A simulated or unverified tier always carries its label. */
+.tier {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 650;
+  padding: 3px 6px;
+  border: 1px solid #dce5f8;
+  background: #edf2fc;
+  color: #254eab;
+  white-space: nowrap;
+}
+.tier small {
+  font-weight: 500;
+  margin-left: 2px;
+}
+.tier.unverified {
+  color: var(--muted);
+  background: #f3f4ef;
+  border-color: var(--line);
+}
+.tier.simulated {
+  color: #6b4e00;
+  background: #fbf3dc;
+  border-color: #eedfb3;
+  border-style: dashed;
+}
+.verification {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
 .timeline {
   list-style: none;
   padding: 0;
@@ -2073,4 +2104,24 @@ td small {
     transition: none !important;
     scroll-behavior: auto !important;
   }
+}
+.ext-link {
+  display: inline-block;
+  margin: 8px 12px 4px 0;
+  font-size: 12px;
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+.amount.negative {
+  color: #9a3b26;
+}
+.agent-choice {
+  padding: 18px 0 8px;
+  border-top: 1px solid var(--line);
+}
+.agent-choice .choice-track {
+  margin: 14px 0 6px;
+}
+.agent-choice .choice strong {
+  font-size: 20px;
 }

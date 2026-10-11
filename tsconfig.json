@@ -7,6 +7,7 @@
   "include": [
     "apps/**/*.ts",
     "packages/**/*.ts",
+    "examples/**/*.ts",
     "scripts/**/*.mjs",
     "vitest.config.ts",
     "tests/**/*.ts",
