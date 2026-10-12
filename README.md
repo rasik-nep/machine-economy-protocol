@@ -69,3 +69,12 @@ The website includes an introduction, illustrated protocol walkthrough, architec
 searchable reference, and six live explorer pages. All pages have direct URLs and
 responsive layouts. See [the frontend guide](docs/frontend.md) for the route map,
 design decisions, and browser checks.
+
+## License
+
+Copyright 2026 Rasik Nepal.
+
+Licensed under the [Apache License, Version 2.0](LICENSE). See [NOTICE](NOTICE)
+for attribution. Unless you explicitly state otherwise, any contribution you
+submit for inclusion in this project is licensed under the same terms, without
+any additional terms or conditions.
