@@ -928,7 +928,9 @@ export class DemoChain {
     const deadline = Date.now() + Math.max(90_000, gap * 1_000 + 30_000);
     while ((await this.connection.getSlot()) <= slot) {
       if (Date.now() > deadline) throw new Error("Slot progress timed out");
-      await sleep(400);
+      // Devnet windows span hundreds of slots, so a slower poll stays under the public
+      // RPC's rate limit at little cost in precision.
+      await sleep(this.cluster === "devnet" ? 2_000 : 400);
     }
   }
   jurorRecord(juror: PublicKey) {
