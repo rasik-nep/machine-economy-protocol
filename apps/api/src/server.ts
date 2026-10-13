@@ -60,7 +60,7 @@ export function createDemoServer(chain: DemoChain) {
         );
         res.setHeader(
           "Content-Security-Policy",
-          "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'"
+          "default-src 'self'; style-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; frame-src https://player.vimeo.com; frame-ancestors 'none'"
         );
         try {
           res.end(await readFile(`apps/web/public/${isPage ? "index.html" : path.slice(1)}`));
