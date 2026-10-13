@@ -48,3 +48,4 @@ apps/web/public/app.js
 test-results/
 playwright-report/
 apps/web/public/site.js
+apps/web/public/replay-mode.js

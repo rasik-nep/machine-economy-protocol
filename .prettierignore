@@ -13,5 +13,8 @@ machine_economy_protocol_whitepaper_v0.1.md
 PROJECT_STEPS.local.md
 
 apps/web/public/app.js
+apps/web/public/site.js
+apps/web/public/replay-mode.js
+apps/web/replay/
 test-results/
 playwright-report/

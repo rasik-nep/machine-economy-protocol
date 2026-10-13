@@ -43,6 +43,7 @@ export default tseslint.config(
       "dist/",
       "apps/web/public/app.js",
       "apps/web/public/site.js",
+      "apps/web/public/replay-mode.js",
       "test-results/",
       "playwright-report/",
       "ledger/",

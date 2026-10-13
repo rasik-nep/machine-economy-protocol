@@ -117,6 +117,16 @@ validator's own error, such as `Unable to bind faucet ... Operation not
 permitted`. Run the command outside the sandbox.
 See [end-to-end-demo.md](end-to-end-demo.md) for the full workflow.
 
+## Public static replay
+
+```sh
+pnpm run replay:export    # newest complete devnet run → apps/web/replay/
+pnpm run site:build       # website + replay → dist/site (what Vercel serves)
+pnpm run site:preview     # http://127.0.0.1:4173
+```
+
+See [devnet.md](devnet.md#publish-the-run-as-a-static-replay).
+
 ## Independent precedent check
 
 After a run publishes a precedent, check it from the chain alone, without the

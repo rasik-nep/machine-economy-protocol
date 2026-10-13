@@ -1,6 +1,12 @@
 /* Rendering is gated on state and uses the fixed dashboard DOM and fixture rows. */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { pages, pageForPath, renderPublicPage, workDiagram, link, type Page } from "./site.js";
+import {
+  REPLAY_FINAL_STAGE,
+  parseReplayStage,
+  replaySnapshotPath,
+  replayStageAfter
+} from "./replay-mode.js";
 import type { DemoChain } from "../../api/src/chain.ts";
 type Wire<T> = T extends bigint
   ? string
@@ -18,6 +24,16 @@ let view: Page = pageForPath(location.pathname) ?? "home";
 let connected = false;
 let requesting = false;
 let localError = "";
+/** The static site replays a recorded run; the local demo server drives a live one. */
+const replay = document.documentElement.dataset.mode === "replay";
+const REPLAY_STAGE_KEY = "mep.replay-stage";
+// A first visit opens the completed run so every page shows its full on-chain proof.
+let replayStage = REPLAY_FINAL_STAGE;
+try {
+  replayStage = parseReplayStage(sessionStorage.getItem(REPLAY_STAGE_KEY)) ?? replayStage;
+} catch {
+  /* Storage may be unavailable; the replay still works from the final stage. */
+}
 const content = document.querySelector<HTMLElement>("#content")!;
 const notice = document.querySelector<HTMLElement>("#notice")!;
 const descriptions = (s: State) => [
@@ -115,9 +131,13 @@ function renderOverview() {
       "Follow one agent from its first contract to a better next decision.",
       s.stage === 8
         ? '<button class="button primary" data-view="dispute">View precedent</button>'
-        : button(s.stage === 0 ? "Run full demo" : "Finish demo", "/demo/run", "primary")
+        : button(
+            replay ? "Skip to the result" : s.stage === 0 ? "Run full demo" : "Finish demo",
+            "/demo/run",
+            "primary"
+          )
     ) +
-    `<div class="hero-grid"><section class="experiment"><div class="kicker"><span>THE ECONOMIC LEARNING LOOP</span><span class="tag">On-chain proof</span></div><h2>Same agent. Same task. <br><em>A different decision.</em></h2><div class="choice-track"><div class="choice"><small>First procurement</small><strong>${escape(s.firstProvider)}</strong><p>Lowest expected cost</p></div><div class="choice-line"></div><div class="choice"><small>${s.stage >= 7 ? "After learning" : "Learning target"}</small><strong>${s.stage >= 7 ? escape(s.secondProvider) : "Experience"}</strong><p>${s.stage >= 7 ? "Memory changes the winner" : "Verification → precedent → memory"}</p></div></div></section><section class="run-panel"><div class="panel-title"><h3 class="micro">CURRENT RUN</h3><span class="step-count">${String(s.stage + 1).padStart(2, "0")} / ${String(s.stages.length).padStart(2, "0")}</span></div><h3>${escape(s.stageLabel)}</h3><p>${escape(descriptions(s)[s.stage])}</p><div class="step-bars" aria-label="${s.stage + 1} of ${s.stages.length} stages">${s.stages.map((_, i) => `<span class="${i <= s.stage ? "done" : ""}"></span>`).join("")}</div>${button(s.busy ? `Processing on ${s.network}…` : actions[s.stage]!, s.stage === 1 ? "/demo/degrade" : s.stage === 2 ? "/demo/resolve" : s.stage === 8 ? "/demo/reset" : "/demo/next", s.stage === 1 ? "danger" : "primary")}</section></div>
+    `<div class="hero-grid"><section class="experiment"><div class="kicker"><span>THE ECONOMIC LEARNING LOOP</span><span class="tag">On-chain proof</span></div><h2>Same agent. Same task. <br><em>A different decision.</em></h2><div class="choice-track"><div class="choice"><small>First procurement</small><strong>${escape(s.firstProvider)}</strong><p>Lowest expected cost</p></div><div class="choice-line"></div><div class="choice"><small>${s.stage >= 7 ? "After learning" : "Learning target"}</small><strong>${s.stage >= 7 ? escape(s.secondProvider) : "Experience"}</strong><p>${s.stage >= 7 ? "Memory changes the winner" : "Verification → precedent → memory"}</p></div></div></section><section class="run-panel"><div class="panel-title"><h3 class="micro">CURRENT RUN</h3><span class="step-count">${String(s.stage + 1).padStart(2, "0")} / ${String(s.stages.length).padStart(2, "0")}</span></div><h3>${escape(s.stageLabel)}</h3><p>${escape(descriptions(s)[s.stage])}</p><div class="step-bars" aria-label="${s.stage + 1} of ${s.stages.length} stages">${s.stages.map((_, i) => `<span class="${i <= s.stage ? "done" : ""}"></span>`).join("")}</div>${button(s.busy ? `Processing on ${s.network}…` : replay && s.stage === 8 ? "Replay from the start" : actions[s.stage]!, s.stage === 1 ? "/demo/degrade" : s.stage === 2 ? "/demo/resolve" : s.stage === 8 ? "/demo/reset" : "/demo/next", s.stage === 1 ? "danger" : "primary")}</section></div>
   <section class="metrics" aria-label="Protocol statistics"><div class="metric"><span class="label">ACTIVE AGENTS <span>◎</span></span><strong>04</strong><p>Procurement, twin, specialist, client</p></div><div class="metric"><span class="label">COMPUTE OFFERS <span>▦</span></span><strong>03</strong><p>Two models · three providers</p></div><div class="metric"><span class="label">LOCKED ESCROW <span>◇</span></span><strong>${sol(total)}<small>SOL</small></strong><p>${s.stage === 8 ? "All work settled" : "Actual on-chain contract balances"}</p></div><div class="metric"><span class="label">MEMORY CHECKPOINTS <span>↗</span></span><strong>${String(s.agent.checkpoints).padStart(2, "0")}</strong><p>${s.agent.checkpoints ? "Experience committed on-chain" : "Ready to learn from the first job"}</p></div></section>
   <div class="section-grid"><section class="panel"><div class="panel-title"><h2>Work, composed.</h2><span class="micro muted">AGENT → AGENT → COMPUTE</span></div><p class="sub">Independent obligations. Explicit escrow. Verifiable outcomes.</p><div class="flow">${s.contracts.map((c, i) => `<div class="flow-row"><span class="flow-icon">${i === 0 ? "A" : i === 1 ? "B" : i === 2 ? initial(s.firstProvider) : initial(s.secondProvider)}</span><div class="flow-copy"><h3>${escape(c.label)}</h3><p>${sol(c.priceLamports)} SOL · <code>${short(c.address)}</code></p></div>${status(c.status)}</div>`).join("")}${s.stage === 0 ? '<div class="flow-row"><span class="flow-icon">B</span><div class="flow-copy"><h3>OCR specialist subcontract</h3><p>Created and funded when the first job starts</p></div>' + status("pending") + "</div>" : ""}</div><p class="table-note">Parent revenue: ${sol(s.contracts[0]?.priceLamports ?? 0)} SOL${s.contracts[1] ? ` · Specialist cost: ${sol(s.contracts[1].priceLamports)} SOL` : ""}. Each contract settles independently.</p></section><section class="panel"><div class="panel-title"><h2>From work to experience</h2><span class="micro muted">LIVE</span></div><ol class="timeline">${[
     "Registry & agent origin",
@@ -198,7 +218,7 @@ function renderDispute() {
     intro(
       "A breach becomes precedent.",
       "A failed verification, a provider-signed receipt, committed evidence, and five controlled jurors.",
-      s.stage >= 6
+      s.stage >= 6 && !replay
         ? button(s.summary ? "Regenerate explanation" : "Explain with Gemini", "/demo/summary")
         : ""
     ) +
@@ -210,7 +230,7 @@ function renderDispute() {
       }
     ).join(
       ""
-    )}</div><p class="table-note">Commitments bind the dispute address, juror identity, vote, and a random 32-byte nonce.</p></section>${s.verifications.second ? `<section class="panel"><h2>Job 2 verification</h2><p class="sub">The new provider’s result passed the same kind of committed policy with a provider-signed receipt, so the job earned E2 and settled.</p>${verificationPanel("Job 2 · " + (s.secondProvider ?? ""), s.verifications.second)}</section>` : ""}${s.evidenceBundle ? `<section class="panel"><h2>Check it without this server</h2><p class="sub">The evidence bundle holds every off-chain document. An independent reader fetches the precedent, dispute, and contract accounts from the RPC, checks each document against their roots, verifies the receipt signature, re-runs the committed checker, and re-ranks the offers.</p><pre class="evidence">pnpm router:verify --bundle ${escape(s.evidenceBundle)}</pre></section>` : ""}<section class="panel"><h2>Ruling explanation</h2><p class="sub">Optional Gemini summary. It has no authority over votes, arithmetic, or escrow.</p>${s.summary ? `<div class="summary">${escape(s.summary.text)}<small>${escape(s.summary.model)} · Advisory explanation</small></div>` : `<div class="empty">${s.geminiConfigured ? (s.stage >= 6 ? "Use Explain with Gemini to request an advisory summary." : "Gemini is configured. Finalize the ruling to request an explanation.") : "No Gemini key configured. The complete protocol loop still works."}</div>`}</section>`
+    )}</div><p class="table-note">Commitments bind the dispute address, juror identity, vote, and a random 32-byte nonce.</p></section>${s.verifications.second ? `<section class="panel"><h2>Job 2 verification</h2><p class="sub">The new provider’s result passed the same kind of committed policy with a provider-signed receipt, so the job earned E2 and settled.</p>${verificationPanel("Job 2 · " + (s.secondProvider ?? ""), s.verifications.second)}</section>` : ""}${s.evidenceBundle ? `<section class="panel"><h2>Check it without this server</h2><p class="sub">The evidence bundle holds every off-chain document. An independent reader fetches the precedent, dispute, and contract accounts from the RPC, checks each document against their roots, verifies the receipt signature, re-runs the committed checker, and re-ranks the offers.${replay ? ` Download the <a href="/replay/${escape(s.evidenceBundle)}" download>evidence bundle</a> and run this from a clone of the repository.` : ""}</p><pre class="evidence">pnpm router:verify --bundle ${escape(s.evidenceBundle)}${s.network === "devnet" ? " --rpc https://api.devnet.solana.com" : ""}</pre></section>` : ""}<section class="panel"><h2>Ruling explanation</h2><p class="sub">Optional Gemini summary. It has no authority over votes, arithmetic, or escrow.</p>${s.summary ? `<div class="summary">${escape(s.summary.text)}<small>${escape(s.summary.model)} · Advisory explanation</small></div>` : `<div class="empty">${replay ? "No advisory summary was recorded for this run." : s.geminiConfigured ? (s.stage >= 6 ? "Use Explain with Gemini to request an advisory summary." : "Gemini is configured. Finalize the ruling to request an explanation.") : "No Gemini key configured. The complete protocol loop still works."}</div>`}</section>`
   );
 }
 function renderActivity() {
@@ -254,9 +274,11 @@ function updateNavigation() {
     if (active) n.setAttribute("aria-current", "page");
     else n.removeAttribute("aria-current");
   });
-  document.querySelector("#connection-status")!.textContent = connected
-    ? `Connected · ${state ? network(state) : "Localnet"}`
-    : "Disconnected";
+  document.querySelector("#connection-status")!.textContent = replay
+    ? `Recorded run · ${state ? network(state) : "Devnet"}`
+    : connected
+      ? `Connected · ${state ? network(state) : "Localnet"}`
+      : "Disconnected";
 }
 function render() {
   updateNavigation();
@@ -269,7 +291,9 @@ function render() {
     return;
   }
   if (!state) {
-    content.innerHTML = `<section class="connection-empty"><p class="eyebrow">PROTOCOL EXPLORER</p><h1>${connected ? "Loading protocol state." : "Connect to your local demo."}</h1><p>The live explorer reads real on-chain accounts. Start <code>pnpm dev</code> in the repository, then retry the connection.</p><div class="actions"><button class="button primary" data-retry>Retry connection</button>${link("docs", "View setup guide")}</div></section>`;
+    content.innerHTML = replay
+      ? `<section class="connection-empty"><p class="eyebrow">PROTOCOL EXPLORER</p><h1>${localError ? "The recorded run is unavailable." : "Loading the recorded run."}</h1><p>This page replays a real devnet run from published snapshots.</p><div class="actions"><button class="button primary" data-retry>Retry</button>${link("docs", "Run it yourself")}</div></section>`
+      : `<section class="connection-empty"><p class="eyebrow">PROTOCOL EXPLORER</p><h1>${connected ? "Loading protocol state." : "Connect to your local demo."}</h1><p>The live explorer reads real on-chain accounts. Start <code>pnpm dev</code> in the repository, then retry the connection.</p><div class="actions"><button class="button primary" data-retry>Retry connection</button>${link("docs", "View setup guide")}</div></section>`;
     return;
   }
   const openDetails = new Set(
@@ -282,16 +306,19 @@ function render() {
   const focusKey =
     focused?.dataset.action ?? focused?.closest<HTMLDetailsElement>("details")?.dataset.detail;
   const recover =
-    state.canAbandon ||
-    (state.stage > 0 && state.stage < 8 && state.contracts.every((c) => c.escrowLamports === 0))
+    !replay &&
+    (state.canAbandon ||
+      (state.stage > 0 && state.stage < 8 && state.contracts.every((c) => c.escrowLamports === 0)))
       ? ` ${button("Start a fresh run", "/demo/reset")}`
       : "";
   notice.innerHTML =
     localError || state.error
       ? `<div class="notice error">${escape(localError || state.error)}${recover}</div>`
-      : state.busy || requesting
+      : (state.busy || requesting) && !replay
         ? `<div class="notice"><span class="spinner"></span>${escape(state.stageLabel)} · Confirming ${escape(state.network)} transactions. Jury phases wait for their on-chain slot deadlines.</div>`
-        : "";
+        : replay
+          ? `<div class="notice">Replay of a real ${escape(network(state))} run · stage ${state.stage + 1} of ${state.stages.length}. Every account and signature is on-chain: open any Explorer link to verify it. ${explorer(state.links.program, "Program on Explorer ↗")}</div>`
+          : "";
   content.innerHTML =
     view === "market"
       ? renderMarket()
@@ -338,8 +365,15 @@ async function refresh() {
   if (refreshing) return;
   refreshing = true;
   try {
-    const response = await fetch("/api/state", { signal: AbortSignal.timeout(12000) });
-    if (!response.ok) throw new Error("Localnet is unavailable. Check the demo server and retry.");
+    const response = await fetch(replay ? replaySnapshotPath(replayStage) : "/api/state", {
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!response.ok)
+      throw new Error(
+        replay
+          ? "The recorded run could not be loaded."
+          : "Localnet is unavailable. Check the demo server and retry."
+      );
     const next = (await response.json()) as State;
     const changed = JSON.stringify({ ...state, slot: 0 }) !== JSON.stringify({ ...next, slot: 0 });
     state = next;
@@ -387,6 +421,22 @@ document.addEventListener("click", (event) => {
     navigate(nextView, target.getAttribute("href") ?? pages[nextView].path);
     return;
   }
+  if (replay && target.dataset.action && state && !requesting) {
+    const nextStage = replayStageAfter(target.dataset.action, state.stage);
+    if (nextStage === undefined) return;
+    replayStage = nextStage;
+    try {
+      sessionStorage.setItem(REPLAY_STAGE_KEY, String(nextStage));
+    } catch {
+      /* The replay works without storage; a reload then opens the completed run. */
+    }
+    requesting = true;
+    void refresh().finally(() => {
+      requesting = false;
+      render();
+    });
+    return;
+  }
   if (target.dataset.action && !requesting && state && !state.busy && connected) {
     const action = target.dataset.action;
     const payload = { run: state.run, stage: state.stage };
@@ -419,6 +469,8 @@ document.addEventListener("click", (event) => {
 });
 render();
 void refresh();
-setInterval(() => {
-  if (!document.hidden) void refresh();
-}, 3000);
+// A recorded run never changes, so only the live demo polls.
+if (!replay)
+  setInterval(() => {
+    if (!document.hidden) void refresh();
+  }, 3000);
