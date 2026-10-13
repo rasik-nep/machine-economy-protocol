@@ -1,0 +1,1082 @@
+{
+  "stage": 7,
+  "run": 1791861681931,
+  "network": "devnet",
+  "stages": [
+    "Foundation ready",
+    "Work in progress",
+    "Verification failed",
+    "Dispute opened",
+    "Votes committed",
+    "Votes revealed",
+    "Ruling finalized",
+    "Memory checkpointed",
+    "Second job settled"
+  ],
+  "stageLabel": "Memory checkpointed",
+  "canAbandon": false,
+  "slot": 510494137,
+  "contracts": [
+    {
+      "label": "Parent · evidence report",
+      "address": "DZnpiEig4u3hyZCaiNxuV2bAm48GpqSveDMUxKhATz31",
+      "url": "https://explorer.solana.com/address/DZnpiEig4u3hyZCaiNxuV2bAm48GpqSveDMUxKhATz31?cluster=devnet",
+      "status": "running",
+      "escrowLamports": 15000000,
+      "priceLamports": 15000000,
+      "deadlineSlot": 511487979
+    },
+    {
+      "label": "Child · OCR extraction",
+      "address": "37fEK2fWPkoBKfctgKqacLRaYH1NPE4RyebhYsrHEnNE",
+      "url": "https://explorer.solana.com/address/37fEK2fWPkoBKfctgKqacLRaYH1NPE4RyebhYsrHEnNE?cluster=devnet",
+      "status": "settled",
+      "escrowLamports": 0,
+      "priceLamports": 3000000,
+      "deadlineSlot": 510498359
+    },
+    {
+      "label": "Job 1 · Provider X",
+      "address": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "url": "https://explorer.solana.com/address/J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys?cluster=devnet",
+      "status": "breached",
+      "escrowLamports": 0,
+      "priceLamports": 5000000,
+      "deadlineSlot": 510493531
+    }
+  ],
+  "votes": [
+    {
+      "juror": 1,
+      "address": "AwTsXVTUMefpUnkY11EVsZnNENade9bt6zhywNhJH7b5",
+      "committed": true,
+      "revealed": true,
+      "vote": "breach",
+      "commitment": "sha256:edfa6fbf5f06fd78660d74c0b06627d0f4e050ad04deb928a018fb0bfef81264"
+    },
+    {
+      "juror": 2,
+      "address": "6CSi9Ca9hDEXv5pTQE3HjMZ3r36Nat5FDwAscH4KEhFh",
+      "committed": true,
+      "revealed": true,
+      "vote": "breach",
+      "commitment": "sha256:e917d62e2431ff5040e60c29b080c905b4c8c5f64af5a172622f1aab0539ad84"
+    },
+    {
+      "juror": 3,
+      "address": "F6UTPeQARq7hCEPQSJ7TZrNHmDiWWHSHtsHJfubBuQ7",
+      "committed": true,
+      "revealed": true,
+      "vote": "breach",
+      "commitment": "sha256:b378e21d33285d632f68ce1e7294495767f4eaf1d77b2e3c0cb3366c34d72fbb"
+    },
+    {
+      "juror": 4,
+      "address": "14Je6wsLkyPD3TZ2EGJeksk1M23fm7dZfRJgkY983Ep2",
+      "committed": true,
+      "revealed": true,
+      "vote": "breach",
+      "commitment": "sha256:360acb608cf5a188d4bf66a034fbc208e69dcc3f56030b61ce9072815e4f8193"
+    },
+    {
+      "juror": 5,
+      "address": "9GwL2bfKKkoh8BGHTxFo6dwotQYvfDYksC8PqymMz5kH",
+      "committed": true,
+      "revealed": true,
+      "vote": "no breach",
+      "commitment": "sha256:74194f25daa5bf467866a370c896e66baf6e5738368688c89b3b0efc77bf6434"
+    }
+  ],
+  "receipts": [
+    {
+      "label": "Create agent passport",
+      "signature": "43Zhb3cwEETXeiPvS81mqM9xLEq4ohUSGw1YFGtKxwWiEmuCaGShEccumFySWsxWbWgsMKKjhg4twZNkhscxryp4",
+      "url": "https://explorer.solana.com/tx/43Zhb3cwEETXeiPvS81mqM9xLEq4ohUSGw1YFGtKxwWiEmuCaGShEccumFySWsxWbWgsMKKjhg4twZNkhscxryp4?cluster=devnet"
+    },
+    {
+      "label": "Create agent passport",
+      "signature": "32wrT5EaYrKoMTFmxgQBP3uNqtwr5C2Apdfh6RicRTK3BgdB5dhEdbxX2THmZuUpHvySNFkwSsHUjX3PVyAYX1N1",
+      "url": "https://explorer.solana.com/tx/32wrT5EaYrKoMTFmxgQBP3uNqtwr5C2Apdfh6RicRTK3BgdB5dhEdbxX2THmZuUpHvySNFkwSsHUjX3PVyAYX1N1?cluster=devnet"
+    },
+    {
+      "label": "Create agent passport",
+      "signature": "5AinwiKifNftf7k92UHtbkg42R3VspN8YgNaGPPwjWSFFjxPNQW2tYSUFwqAA4PWnim6R9vbCrzEgAo3DJ55Xco7",
+      "url": "https://explorer.solana.com/tx/5AinwiKifNftf7k92UHtbkg42R3VspN8YgNaGPPwjWSFFjxPNQW2tYSUFwqAA4PWnim6R9vbCrzEgAo3DJ55Xco7?cluster=devnet"
+    },
+    {
+      "label": "Create agent passport",
+      "signature": "2UvNJHfnsKEKeBAuDWvDRPxveQeKDHVz3NcngUb12SUxGLmorcBwT9JG1xu3K5mrE53Sb7pSmFK4UoVHh4kjfve4",
+      "url": "https://explorer.solana.com/tx/2UvNJHfnsKEKeBAuDWvDRPxveQeKDHVz3NcngUb12SUxGLmorcBwT9JG1xu3K5mrE53Sb7pSmFK4UoVHh4kjfve4?cluster=devnet"
+    },
+    {
+      "label": "Create parent work contract",
+      "signature": "34kxi9KRpp6a1mTJUkeajc7EXcX83XksZYw2Uu3Xn4SA44FYSZt7bYtfrYSJKCUSqT1LuBgTgGYUmjTfVh1VCgPX",
+      "url": "https://explorer.solana.com/tx/34kxi9KRpp6a1mTJUkeajc7EXcX83XksZYw2Uu3Xn4SA44FYSZt7bYtfrYSJKCUSqT1LuBgTgGYUmjTfVh1VCgPX?cluster=devnet"
+    },
+    {
+      "label": "Fund escrow",
+      "signature": "4YPVYmuXfWjFeDCdbf39eXUa8hCthgjz3gNzFrjn7bfEvZkUgY5dvRpXeirPzufsFDtco6kj5cnwp2SmssTJ2gCH",
+      "url": "https://explorer.solana.com/tx/4YPVYmuXfWjFeDCdbf39eXUa8hCthgjz3gNzFrjn7bfEvZkUgY5dvRpXeirPzufsFDtco6kj5cnwp2SmssTJ2gCH?cluster=devnet"
+    },
+    {
+      "label": "Start work",
+      "signature": "4PTkuBFna3rgC1fNzqmUXAfDmxvUYmdLUc7573oupWcXcq9L9cLoDVtD7exWC7m39f6UzUkH1NVoVeqF3NEVJLM7",
+      "url": "https://explorer.solana.com/tx/4PTkuBFna3rgC1fNzqmUXAfDmxvUYmdLUc7573oupWcXcq9L9cLoDVtD7exWC7m39f6UzUkH1NVoVeqF3NEVJLM7?cluster=devnet"
+    },
+    {
+      "label": "Create OCR subcontract",
+      "signature": "5AUem91ay3qKhc9t3MTmAmhEDVmB2Us4kpmSGNgw1G3MYqb32TewVKCgAwbxcZjQWdZGYuS8egguXg3xxzR7zJaY",
+      "url": "https://explorer.solana.com/tx/5AUem91ay3qKhc9t3MTmAmhEDVmB2Us4kpmSGNgw1G3MYqb32TewVKCgAwbxcZjQWdZGYuS8egguXg3xxzR7zJaY?cluster=devnet"
+    },
+    {
+      "label": "Fund escrow",
+      "signature": "5e6Vt92bc31QGZzLzathmk3UrvouLEJSFjjVy1a5VDTnyBTtpQqERGGgUANf7sz6VcP2SQ67Z8yJfmcGYvDAWyba",
+      "url": "https://explorer.solana.com/tx/5e6Vt92bc31QGZzLzathmk3UrvouLEJSFjjVy1a5VDTnyBTtpQqERGGgUANf7sz6VcP2SQ67Z8yJfmcGYvDAWyba?cluster=devnet"
+    },
+    {
+      "label": "Start work",
+      "signature": "4xCXARNM9cbZrCBYESvCMUKEgzE6PeVcWxMyStnNvCp4nQkCqRX4NctkVZ6Q7XtvVxP3voHmuhBSE3YXPVCm6P7p",
+      "url": "https://explorer.solana.com/tx/4xCXARNM9cbZrCBYESvCMUKEgzE6PeVcWxMyStnNvCp4nQkCqRX4NctkVZ6Q7XtvVxP3voHmuhBSE3YXPVCm6P7p?cluster=devnet"
+    },
+    {
+      "label": "Submit committed result",
+      "signature": "3ikoytACkABoFusgiBy14SXXH872LpigNcgWZjDePRpMN598SLaWDpr4Q4pGt1kCrwyuiY79pCmvN8YAV5XHkuFE",
+      "url": "https://explorer.solana.com/tx/3ikoytACkABoFusgiBy14SXXH872LpigNcgWZjDePRpMN598SLaWDpr4Q4pGt1kCrwyuiY79pCmvN8YAV5XHkuFE?cluster=devnet"
+    },
+    {
+      "label": "Verify result",
+      "signature": "CeuhR8zBUGLrdrd4iJSpGRdzUbvTMrfjzvezCciy4BzRnBcffp4ACnBYiVLQ6qcei24mFCmWiuyFa9Jnen8Sods",
+      "url": "https://explorer.solana.com/tx/CeuhR8zBUGLrdrd4iJSpGRdzUbvTMrfjzvezCciy4BzRnBcffp4ACnBYiVLQ6qcei24mFCmWiuyFa9Jnen8Sods?cluster=devnet"
+    },
+    {
+      "label": "Settle escrow",
+      "signature": "2VJG7FgHeUPFcjsT6VJrQMEhAMfMUAmWcVSpx1RmE62iXCPLHgKcx7BC5xbphkt8omNnrq9eASKqL3yi2EmXyRWu",
+      "url": "https://explorer.solana.com/tx/2VJG7FgHeUPFcjsT6VJrQMEhAMfMUAmWcVSpx1RmE62iXCPLHgKcx7BC5xbphkt8omNnrq9eASKqL3yi2EmXyRWu?cluster=devnet"
+    },
+    {
+      "label": "Hire Provider X: create, fund, start",
+      "signature": "3zgXBYY6ak9RfwSYyMq5xu4fEYgycTbCz6hEdgRxxt4gbxcFNF5fzRhbLmjQaPuYB9fNmfXA9z5UdAB8mgyjPJHv",
+      "url": "https://explorer.solana.com/tx/3zgXBYY6ak9RfwSYyMq5xu4fEYgycTbCz6hEdgRxxt4gbxcFNF5fzRhbLmjQaPuYB9fNmfXA9z5UdAB8mgyjPJHv?cluster=devnet"
+    },
+    {
+      "label": "Provider X delivers result · degraded serving",
+      "signature": "4HjHqNb3QJNsQVzHn7TBETSwJARn18yixDYR8ZHhU8E2tU8TLvxBPL5VG8wm2QgYkxn9LFqMJyKoynxFRVWkRedX",
+      "url": "https://explorer.solana.com/tx/4HjHqNb3QJNsQVzHn7TBETSwJARn18yixDYR8ZHhU8E2tU8TLvxBPL5VG8wm2QgYkxn9LFqMJyKoynxFRVWkRedX?cluster=devnet"
+    },
+    {
+      "label": "Open quality-breach dispute",
+      "signature": "5fDXcsHvue6R3MmFiiAdGV2CN88BVmsoowrYr9Ua6x8x4WNvN97u9UY6k87YQgoK2MzZhP7LmvgFussmd2e7SFQp",
+      "url": "https://explorer.solana.com/tx/5fDXcsHvue6R3MmFiiAdGV2CN88BVmsoowrYr9Ua6x8x4WNvN97u9UY6k87YQgoK2MzZhP7LmvgFussmd2e7SFQp?cluster=devnet"
+    },
+    {
+      "label": "Juror 1 commits",
+      "signature": "2fZCQq7bTPsPi551qPGEkAEX47ZJY6EB3AsDceoPZy4wRUmWGaufWM5sxHguie2ZvQCztCRqvrsAbguUN6upFWt2",
+      "url": "https://explorer.solana.com/tx/2fZCQq7bTPsPi551qPGEkAEX47ZJY6EB3AsDceoPZy4wRUmWGaufWM5sxHguie2ZvQCztCRqvrsAbguUN6upFWt2?cluster=devnet"
+    },
+    {
+      "label": "Juror 2 commits",
+      "signature": "2z97BySR8RFNQCXvPXE4hHadwS14PsSVTA1udC12sDiGQgFyW5MSdceM28rAEwo7SZiev3dFD1f77cKneM821Cod",
+      "url": "https://explorer.solana.com/tx/2z97BySR8RFNQCXvPXE4hHadwS14PsSVTA1udC12sDiGQgFyW5MSdceM28rAEwo7SZiev3dFD1f77cKneM821Cod?cluster=devnet"
+    },
+    {
+      "label": "Juror 3 commits",
+      "signature": "5jZFPrshUhMvEEme1j8ozB5sBvtYdYVUW9ooUw7Ukum2YGsB4H58S7Wi7EkgfTQoemrAxENYztgT8pi9sjzz31cY",
+      "url": "https://explorer.solana.com/tx/5jZFPrshUhMvEEme1j8ozB5sBvtYdYVUW9ooUw7Ukum2YGsB4H58S7Wi7EkgfTQoemrAxENYztgT8pi9sjzz31cY?cluster=devnet"
+    },
+    {
+      "label": "Juror 4 commits",
+      "signature": "4Vn17KiDitFPpUVtucDwGWRPx7qfaYtTHUfDnj1NSSF2aKqpmxvY6RJpyKvoa2iFUN5RsPsaxNs5FrC2uksCBDhD",
+      "url": "https://explorer.solana.com/tx/4Vn17KiDitFPpUVtucDwGWRPx7qfaYtTHUfDnj1NSSF2aKqpmxvY6RJpyKvoa2iFUN5RsPsaxNs5FrC2uksCBDhD?cluster=devnet"
+    },
+    {
+      "label": "Juror 5 commits",
+      "signature": "3Ypyjkngqgue9U5PrzJEqdkvfJPBZhgXbxxPPEnfGS6v1NDmMA7jJeAYN1uMsmytzygunHPxC3axDKEyBCKJKyrh",
+      "url": "https://explorer.solana.com/tx/3Ypyjkngqgue9U5PrzJEqdkvfJPBZhgXbxxPPEnfGS6v1NDmMA7jJeAYN1uMsmytzygunHPxC3axDKEyBCKJKyrh?cluster=devnet"
+    },
+    {
+      "label": "Juror 1 reveals breach",
+      "signature": "4q9RM5nDgDEJyYWqAQDHCztZDuUcErDQ4FmATQ3JaM6vLhmEQkYicZWqWs1z6duF27Zij4hhir8Zw22d7RHJexRC",
+      "url": "https://explorer.solana.com/tx/4q9RM5nDgDEJyYWqAQDHCztZDuUcErDQ4FmATQ3JaM6vLhmEQkYicZWqWs1z6duF27Zij4hhir8Zw22d7RHJexRC?cluster=devnet"
+    },
+    {
+      "label": "Juror 2 reveals breach",
+      "signature": "2uNLDZLKMh1rd5ZQJu8g3Lc28dGah6ZpYdUYjf16dDCpURQ5heJBA7PbcQVPUoxyq2y4oN3hCN3FNtjptpA7YaFW",
+      "url": "https://explorer.solana.com/tx/2uNLDZLKMh1rd5ZQJu8g3Lc28dGah6ZpYdUYjf16dDCpURQ5heJBA7PbcQVPUoxyq2y4oN3hCN3FNtjptpA7YaFW?cluster=devnet"
+    },
+    {
+      "label": "Juror 3 reveals breach",
+      "signature": "2sh97niZMW4H28Uo6CAsepEu8jjHF5av86r4H6VfrutgDmrMg21E1ABaUVNmNnkeVQJCfUqjPPckxfkueDPK9RXw",
+      "url": "https://explorer.solana.com/tx/2sh97niZMW4H28Uo6CAsepEu8jjHF5av86r4H6VfrutgDmrMg21E1ABaUVNmNnkeVQJCfUqjPPckxfkueDPK9RXw?cluster=devnet"
+    },
+    {
+      "label": "Juror 4 reveals breach",
+      "signature": "UWCd8oUomz3wbZ8GgiS9PaH4ZNfyURHn4n9YNrhpf3n59mvWnyaHSxJKdcutdYCsZdxRtG4mRTEMHmQc6FefgkK",
+      "url": "https://explorer.solana.com/tx/UWCd8oUomz3wbZ8GgiS9PaH4ZNfyURHn4n9YNrhpf3n59mvWnyaHSxJKdcutdYCsZdxRtG4mRTEMHmQc6FefgkK?cluster=devnet"
+    },
+    {
+      "label": "Juror 5 reveals no breach",
+      "signature": "27HixAdWFWtrJaTPE8QMSx4NuG7E44j3sji4FGJVeC5o4sPoU9XvmTj6ykU4pZEnfmxWdFHHY8k7xaw7xiMpv5P3",
+      "url": "https://explorer.solana.com/tx/27HixAdWFWtrJaTPE8QMSx4NuG7E44j3sji4FGJVeC5o4sPoU9XvmTj6ykU4pZEnfmxWdFHHY8k7xaw7xiMpv5P3?cluster=devnet"
+    },
+    {
+      "label": "Finalize ruling and route escrow",
+      "signature": "3tRtv4J6RPRAq29BfNmeEKJbu3XFrC267JDCuS7bSyYmzCLv6zwGDXeFAgqoX3mYujbcMHGtmmpUuh7KuQpByWQy",
+      "url": "https://explorer.solana.com/tx/3tRtv4J6RPRAq29BfNmeEKJbu3XFrC267JDCuS7bSyYmzCLv6zwGDXeFAgqoX3mYujbcMHGtmmpUuh7KuQpByWQy?cluster=devnet"
+    },
+    {
+      "label": "Publish precedent",
+      "signature": "uq8UcETTzFLa1yuqzr4bE5SyujPgFLx9EsjQmPa481u56YnzThHsTZdVTjPoTgBkuMjQKradBW6V62GGm6FL5P9",
+      "url": "https://explorer.solana.com/tx/uq8UcETTzFLa1yuqzr4bE5SyujPgFLx9EsjQmPa481u56YnzThHsTZdVTjPoTgBkuMjQKradBW6V62GGm6FL5P9?cluster=devnet"
+    },
+    {
+      "label": "Agent A checkpoints memory from precedent",
+      "signature": "4aMVjAPc65qfdzdXzJcV2qvWMwaw5Y2tZNPRM6KHLPLhEvgGZZQC7srxx7hnkMWUwTypTCihTqqq3m26JBiFNEeJ",
+      "url": "https://explorer.solana.com/tx/4aMVjAPc65qfdzdXzJcV2qvWMwaw5Y2tZNPRM6KHLPLhEvgGZZQC7srxx7hnkMWUwTypTCihTqqq3m26JBiFNEeJ?cluster=devnet"
+    },
+    {
+      "label": "Agent A′ checkpoints memory from precedent",
+      "signature": "5ZjqQSoxpQrzryGNMwRpBdMERVuKG1EBSRS4vefeCSXRt41xBnjyRpLgDsRgsciYvajMz6RhaBCLkuwE9KCHmPCm",
+      "url": "https://explorer.solana.com/tx/5ZjqQSoxpQrzryGNMwRpBdMERVuKG1EBSRS4vefeCSXRt41xBnjyRpLgDsRgsciYvajMz6RhaBCLkuwE9KCHmPCm?cluster=devnet"
+    }
+  ],
+  "providers": [
+    {
+      "id": "provider-x",
+      "address": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+      "name": "Provider X",
+      "trust": {
+        "hardware": {
+          "tier": "H0",
+          "status": "unverified",
+          "basis": "No hardware check performed"
+        },
+        "model": {
+          "tier": "M2",
+          "status": "verified",
+          "basis": "Manifest hash verified against the on-chain model record"
+        },
+        "execution": {
+          "tier": "E0",
+          "status": "unverified",
+          "basis": "Provider claim; execution is verified per job"
+        }
+      },
+      "hardwareTrustBps": 7200,
+      "executionTrustBps": 7000,
+      "breachCount": 1,
+      "instance": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+      "stockModelId": "stock-model-ledger-lite",
+      "modelTrustBps": 7600,
+      "offer": "AT4xwtscZVn1fGejpRS2JqByrnEdxdJkdxH7AdzJfc4w",
+      "priceLamports": 5000000,
+      "failureProbabilityBps": 100,
+      "reservationClass": "spot"
+    },
+    {
+      "id": "provider-y",
+      "address": "Gk38vGMKgA47aHWaUFtH9mUJouNJrzYEGFU2txLZygGK",
+      "name": "Provider Y",
+      "trust": {
+        "hardware": {
+          "tier": "H1",
+          "status": "simulated",
+          "basis": "Fixture mode: simulated hardware evidence, not verified"
+        },
+        "model": {
+          "tier": "M2",
+          "status": "verified",
+          "basis": "Manifest hash verified against the on-chain model record"
+        },
+        "execution": {
+          "tier": "E0",
+          "status": "unverified",
+          "basis": "Provider claim; execution is verified per job"
+        }
+      },
+      "hardwareTrustBps": 9100,
+      "executionTrustBps": 9300,
+      "breachCount": 0,
+      "instance": "2KNLRAZTx3E3h5LoXs4B8EWDV1Ga92M9GLV4e5etxXZF",
+      "stockModelId": "stock-model-ledger-lite",
+      "modelTrustBps": 9200,
+      "offer": "FSUugjU6fxqCZ1MThoWuNCKmYKWf7ShyTCcqD85PkCTR",
+      "priceLamports": 8000000,
+      "failureProbabilityBps": 900,
+      "reservationClass": "reserved"
+    },
+    {
+      "id": "provider-z",
+      "address": "DmCHYqZhgap6LED8JCvTXz1RCYsmCR5NyGNpBjkFKGdu",
+      "name": "Provider Z",
+      "trust": {
+        "hardware": {
+          "tier": "H3",
+          "status": "simulated",
+          "basis": "Fixture mode: simulated hardware evidence, not verified"
+        },
+        "model": {
+          "tier": "M2",
+          "status": "verified",
+          "basis": "Manifest hash verified against the on-chain model record"
+        },
+        "execution": {
+          "tier": "E0",
+          "status": "unverified",
+          "basis": "Provider claim; execution is verified per job"
+        }
+      },
+      "hardwareTrustBps": 9800,
+      "executionTrustBps": 9700,
+      "breachCount": 0,
+      "instance": "35nLDYnbGghnRrWvFT1CKkYSuYBaWF2hUvbKXaasjKya",
+      "stockModelId": "stock-model-vision-ocr",
+      "modelTrustBps": 9600,
+      "offer": "2ykpyVKzFJhHo34WR4AZQ9zJyaagpQKdiAE5tEeWiQkh",
+      "priceLamports": 11000000,
+      "failureProbabilityBps": 100,
+      "reservationClass": "dedicated"
+    }
+  ],
+  "rejectedOffers": [],
+  "models": [
+    {
+      "kind": "mep.stock-model.v1",
+      "id": "stock-model-ledger-lite",
+      "displayName": "Ledger Lite Analyst",
+      "modelFamily": "ledger-lite",
+      "version": 1,
+      "artifact": {
+        "format": "stub",
+        "hash": "sha256:0f6d4f9b6a9e5b25b8f1bf0d3ee80b1f7c2b95c0d13f6b6873b48d9ed2c4a501",
+        "parameterCount": "demo-stub",
+        "contextWindowTokens": 8192
+      },
+      "capabilities": [
+        "invoice-reasoning",
+        "evidence-summary",
+        "contract-drafting"
+      ],
+      "license": "demo-fixture"
+    },
+    {
+      "kind": "mep.stock-model.v1",
+      "id": "stock-model-vision-ocr",
+      "displayName": "Vision OCR Specialist",
+      "modelFamily": "vision-ocr",
+      "version": 1,
+      "artifact": {
+        "format": "stub",
+        "hash": "sha256:8fb2bdb7b0e91781794e631f2f2a44a63dd2e65a5027952815c27f4a73d29d41",
+        "parameterCount": "demo-stub",
+        "contextWindowTokens": 4096
+      },
+      "capabilities": [
+        "ocr",
+        "receipt-extraction",
+        "image-evidence",
+        "evidence-summary"
+      ],
+      "license": "demo-fixture"
+    }
+  ],
+  "registry": [
+    {
+      "id": "stock-model-ledger-lite",
+      "root": "sha256:2aedda72c31d368c960d1b1f2ae974e87d01c1c7ded473dbd463b0fd265366bb",
+      "address": "CQi5WDNoxtKYsK5ZS2RWD8SCrvGDrUfpoPcWhTcy6U6h",
+      "verified": true
+    },
+    {
+      "id": "stock-model-vision-ocr",
+      "root": "sha256:85f59739d44f5a03c0812d2263dc1342781e1fbe57ba37da69191e4d4147a02d",
+      "address": "HaGQNGfM2BPHC5JPxF76fd1jLBXg7RtoPBAskcdQwUA6",
+      "verified": true
+    }
+  ],
+  "stockAgents": [
+    {
+      "kind": "mep.stock-agent.v1",
+      "id": "stock-agent-procurement",
+      "displayName": "Procurement Agent",
+      "version": 1,
+      "role": "ops",
+      "policy": {
+        "maxPriceLamports": 20000000,
+        "failureLossLamports": 50000000,
+        "delayLossLamportsPerSecond": 10000,
+        "privacyWeightBps": 650
+      },
+      "preferredCapabilities": [
+        "invoice-reasoning",
+        "contract-drafting"
+      ],
+      "memoryTemplateHash": "sha256:df08a750a4727e7783d3db20609e2a1f9a13a63496d44b0e3ad8f8c6255f6c2e"
+    },
+    {
+      "kind": "mep.stock-agent.v1",
+      "id": "stock-agent-ocr-specialist",
+      "displayName": "OCR Specialist Agent",
+      "version": 1,
+      "role": "specialist",
+      "policy": {
+        "maxPriceLamports": 12000000,
+        "failureLossLamports": 25000000,
+        "delayLossLamportsPerSecond": 6000,
+        "privacyWeightBps": 400
+      },
+      "preferredCapabilities": [
+        "ocr",
+        "receipt-extraction"
+      ],
+      "memoryTemplateHash": "sha256:a0ecf2699f5d739792cde833a2ab0e685248b1e6d95b3f2296e6d084f9a31a27"
+    }
+  ],
+  "policy": {
+    "maxPriceLamports": 20000000,
+    "failureLossLamports": 50000000,
+    "delayLossLamportsPerSecond": 10000,
+    "privacyWeightBps": 650
+  },
+  "firstProvider": "Provider X",
+  "secondProvider": "Provider Z",
+  "before": [
+    {
+      "offerId": "AT4xwtscZVn1fGejpRS2JqByrnEdxdJkdxH7AdzJfc4w",
+      "providerId": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+      "modelInstanceId": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+      "stockModelId": "stock-model-ledger-lite",
+      "trust": {
+        "hardware": "H0",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 100,
+      "trustDeficitBps": 8000,
+      "priceLamports": "5000000",
+      "expectedFailureLossLamports": "500000",
+      "expectedDelayLossLamports": "28000",
+      "trustPenaltyLamports": "1040000",
+      "reservationAdjustmentLamports": "1000000",
+      "totalExpectedCostLamports": "7568000",
+      "providerName": "Provider X",
+      "providerSlug": "provider-x",
+      "reservationClass": "spot"
+    },
+    {
+      "offerId": "2ykpyVKzFJhHo34WR4AZQ9zJyaagpQKdiAE5tEeWiQkh",
+      "providerId": "DmCHYqZhgap6LED8JCvTXz1RCYsmCR5NyGNpBjkFKGdu",
+      "modelInstanceId": "35nLDYnbGghnRrWvFT1CKkYSuYBaWF2hUvbKXaasjKya",
+      "stockModelId": "stock-model-vision-ocr",
+      "trust": {
+        "hardware": "H3",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 100,
+      "trustDeficitBps": 4667,
+      "priceLamports": "11000000",
+      "expectedFailureLossLamports": "500000",
+      "expectedDelayLossLamports": "11000",
+      "trustPenaltyLamports": "606710",
+      "reservationAdjustmentLamports": "0",
+      "totalExpectedCostLamports": "12117710",
+      "providerName": "Provider Z",
+      "providerSlug": "provider-z",
+      "reservationClass": "dedicated"
+    },
+    {
+      "offerId": "FSUugjU6fxqCZ1MThoWuNCKmYKWf7ShyTCcqD85PkCTR",
+      "providerId": "Gk38vGMKgA47aHWaUFtH9mUJouNJrzYEGFU2txLZygGK",
+      "modelInstanceId": "2KNLRAZTx3E3h5LoXs4B8EWDV1Ga92M9GLV4e5etxXZF",
+      "stockModelId": "stock-model-ledger-lite",
+      "trust": {
+        "hardware": "H1",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 900,
+      "trustDeficitBps": 6334,
+      "priceLamports": "8000000",
+      "expectedFailureLossLamports": "4500000",
+      "expectedDelayLossLamports": "19000",
+      "trustPenaltyLamports": "823420",
+      "reservationAdjustmentLamports": "250000",
+      "totalExpectedCostLamports": "13592420",
+      "providerName": "Provider Y",
+      "providerSlug": "provider-y",
+      "reservationClass": "reserved"
+    }
+  ],
+  "after": [
+    {
+      "offerId": "2ykpyVKzFJhHo34WR4AZQ9zJyaagpQKdiAE5tEeWiQkh",
+      "providerId": "DmCHYqZhgap6LED8JCvTXz1RCYsmCR5NyGNpBjkFKGdu",
+      "modelInstanceId": "35nLDYnbGghnRrWvFT1CKkYSuYBaWF2hUvbKXaasjKya",
+      "stockModelId": "stock-model-vision-ocr",
+      "trust": {
+        "hardware": "H3",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 100,
+      "trustDeficitBps": 4667,
+      "priceLamports": "11000000",
+      "expectedFailureLossLamports": "500000",
+      "expectedDelayLossLamports": "11000",
+      "trustPenaltyLamports": "606710",
+      "reservationAdjustmentLamports": "0",
+      "totalExpectedCostLamports": "12117710",
+      "providerName": "Provider Z",
+      "providerSlug": "provider-z",
+      "reservationClass": "dedicated"
+    },
+    {
+      "offerId": "FSUugjU6fxqCZ1MThoWuNCKmYKWf7ShyTCcqD85PkCTR",
+      "providerId": "Gk38vGMKgA47aHWaUFtH9mUJouNJrzYEGFU2txLZygGK",
+      "modelInstanceId": "2KNLRAZTx3E3h5LoXs4B8EWDV1Ga92M9GLV4e5etxXZF",
+      "stockModelId": "stock-model-ledger-lite",
+      "trust": {
+        "hardware": "H1",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 900,
+      "trustDeficitBps": 6334,
+      "priceLamports": "8000000",
+      "expectedFailureLossLamports": "4500000",
+      "expectedDelayLossLamports": "19000",
+      "trustPenaltyLamports": "823420",
+      "reservationAdjustmentLamports": "250000",
+      "totalExpectedCostLamports": "13592420",
+      "providerName": "Provider Y",
+      "providerSlug": "provider-y",
+      "reservationClass": "reserved"
+    },
+    {
+      "offerId": "AT4xwtscZVn1fGejpRS2JqByrnEdxdJkdxH7AdzJfc4w",
+      "providerId": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+      "modelInstanceId": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+      "stockModelId": "stock-model-ledger-lite",
+      "trust": {
+        "hardware": "H0",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 2500,
+      "trustDeficitBps": 8000,
+      "priceLamports": "5000000",
+      "expectedFailureLossLamports": "12500000",
+      "expectedDelayLossLamports": "28000",
+      "trustPenaltyLamports": "1040000",
+      "reservationAdjustmentLamports": "1000000",
+      "totalExpectedCostLamports": "19568000",
+      "providerName": "Provider X",
+      "providerSlug": "provider-x",
+      "reservationClass": "spot"
+    }
+  ],
+  "twinAfter": [
+    {
+      "offerId": "2ykpyVKzFJhHo34WR4AZQ9zJyaagpQKdiAE5tEeWiQkh",
+      "providerId": "DmCHYqZhgap6LED8JCvTXz1RCYsmCR5NyGNpBjkFKGdu",
+      "modelInstanceId": "35nLDYnbGghnRrWvFT1CKkYSuYBaWF2hUvbKXaasjKya",
+      "stockModelId": "stock-model-vision-ocr",
+      "trust": {
+        "hardware": "H3",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 100,
+      "trustDeficitBps": 4667,
+      "priceLamports": "11000000",
+      "expectedFailureLossLamports": "500000",
+      "expectedDelayLossLamports": "11000",
+      "trustPenaltyLamports": "606710",
+      "reservationAdjustmentLamports": "0",
+      "totalExpectedCostLamports": "12117710",
+      "providerName": "Provider Z",
+      "providerSlug": "provider-z",
+      "reservationClass": "dedicated"
+    },
+    {
+      "offerId": "FSUugjU6fxqCZ1MThoWuNCKmYKWf7ShyTCcqD85PkCTR",
+      "providerId": "Gk38vGMKgA47aHWaUFtH9mUJouNJrzYEGFU2txLZygGK",
+      "modelInstanceId": "2KNLRAZTx3E3h5LoXs4B8EWDV1Ga92M9GLV4e5etxXZF",
+      "stockModelId": "stock-model-ledger-lite",
+      "trust": {
+        "hardware": "H1",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 900,
+      "trustDeficitBps": 6334,
+      "priceLamports": "8000000",
+      "expectedFailureLossLamports": "4500000",
+      "expectedDelayLossLamports": "19000",
+      "trustPenaltyLamports": "823420",
+      "reservationAdjustmentLamports": "250000",
+      "totalExpectedCostLamports": "13592420",
+      "providerName": "Provider Y",
+      "providerSlug": "provider-y",
+      "reservationClass": "reserved"
+    },
+    {
+      "offerId": "AT4xwtscZVn1fGejpRS2JqByrnEdxdJkdxH7AdzJfc4w",
+      "providerId": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+      "modelInstanceId": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+      "stockModelId": "stock-model-ledger-lite",
+      "trust": {
+        "hardware": "H0",
+        "model": "M2",
+        "execution": "E0"
+      },
+      "effectiveFailureProbabilityBps": 2500,
+      "trustDeficitBps": 8000,
+      "priceLamports": "5000000",
+      "expectedFailureLossLamports": "12500000",
+      "expectedDelayLossLamports": "28000",
+      "trustPenaltyLamports": "1040000",
+      "reservationAdjustmentLamports": "1000000",
+      "totalExpectedCostLamports": "19568000",
+      "providerName": "Provider X",
+      "providerSlug": "provider-x",
+      "reservationClass": "spot"
+    }
+  ],
+  "choices": {
+    "agent": {
+      "before": "Provider X",
+      "after": "Provider Z"
+    },
+    "twin": {
+      "before": "Provider X",
+      "after": "Provider Z"
+    }
+  },
+  "verifications": {
+    "first": {
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "policyRoot": "sha256:66336d26e046aefe0ebbab6640e400eca76ebb749bfc2f523e7f44706104e040",
+      "receipt": {
+        "kind": "mep.receipt.v1",
+        "signerRole": "provider",
+        "signer": "Da5z73BSJ1Jhp9NknnMVinkERpSeFJdew39WgjD8HPG3",
+        "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+        "sequence": 0,
+        "modelInstance": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+        "requestHash": "sha256:eda3f09371190efd79e208a5f204e5ce6dac3cef3dbf9891f4a0eb27cca13a92",
+        "resultRoot": "sha256:89cbb8089841a63d5f758c86e66e0f2b1f2f3b82fcc958147a850e90ec20054a",
+        "startedAt": 1791863003777,
+        "finishedAt": 1791863003777,
+        "tokensIn": 129,
+        "tokensOut": 143,
+        "hardwareClaim": "simulated demo daemon",
+        "signature": "ed25519:d0408a6cb5c0749e9131a765a39f9a52011b526cfc38c77738f9ed36a7a980186e11277681fef7b4a1c77f9ee84893b3c694bb805a90991cdbf082864e20f500",
+        "label": "provider-signed"
+      },
+      "executionTrust": {
+        "tier": "E1",
+        "status": "verified",
+        "basis": "Provider-signed receipt verified; the result failed verification"
+      },
+      "result": {
+        "kind": "mep.verification.v1",
+        "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+        "policyRoot": "sha256:66336d26e046aefe0ebbab6640e400eca76ebb749bfc2f523e7f44706104e040",
+        "checker": {
+          "name": "mep.task-checker",
+          "version": "1.2.0",
+          "codeRoot": "sha256:ae52d74702adbdeba8f8d52a3e596873063c3eb4651a64f19e781c84edce99d9"
+        },
+        "drawnCanaries": [
+          "date-extraction",
+          "clause-count",
+          "currency-code"
+        ],
+        "taskChecks": [
+          {
+            "id": "output-json",
+            "passed": true,
+            "detail": "Output is a mep.evidence-summary.v1 JSON object"
+          },
+          {
+            "id": "required-fields",
+            "passed": false,
+            "detail": "Missing: invoice.currency, liability.clause, liability.capLamports"
+          },
+          {
+            "id": "tool-calls-valid",
+            "passed": false,
+            "detail": "sum_invoice: missing currency"
+          },
+          {
+            "id": "fields-in-source",
+            "passed": false,
+            "detail": "Not found in the task input: invoice.total, invoice.currency, liability.clause, liability.capLamports, exhibit E-3 finding"
+          },
+          {
+            "id": "answers-consistent",
+            "passed": false,
+            "detail": "summary must state the source invoice, liability terms, and exhibit findings without additional claims"
+          }
+        ],
+        "canaries": [
+          {
+            "challengeId": "date-extraction",
+            "method": "json-fields",
+            "expectedOutputRoot": "sha256:3e85966e71698f3565d01aaa6992dc8a73a1b09df67c218388f98b30c891b47b",
+            "observedOutputRoot": "sha256:bcf65c55c3fed4e5c6c3ae4f64336b695be716b04ebe6137fa61bb763923e0d5",
+            "scoreBps": 0
+          },
+          {
+            "challengeId": "clause-count",
+            "method": "normalized-text",
+            "expectedOutputRoot": "sha256:dc9ecac7e48785b47b7ea4b314bb26072bfbff176417d0a5b6990f96ab060ebe",
+            "observedOutputRoot": "sha256:b338c12d29ff4145418c5f8e72554c1794b9af4241f7b88061a0bd272f2c13d6",
+            "scoreBps": 0
+          },
+          {
+            "challengeId": "currency-code",
+            "method": "normalized-text",
+            "expectedOutputRoot": "sha256:a26cdf3a6e709124385d4d7eb9bff6b897a58ed5597fbab779b89849dbe81b21",
+            "observedOutputRoot": "sha256:a26cdf3a6e709124385d4d7eb9bff6b897a58ed5597fbab779b89849dbe81b21",
+            "scoreBps": 10000
+          }
+        ],
+        "taskScoreBps": 2000,
+        "canaryScoreBps": 3333,
+        "scoreBps": 2399,
+        "thresholdBps": 9000,
+        "passed": false
+      }
+    }
+  },
+  "checker": {
+    "name": "mep.task-checker",
+    "version": "1.2.0",
+    "codeRoot": "sha256:ae52d74702adbdeba8f8d52a3e596873063c3eb4651a64f19e781c84edce99d9"
+  },
+  "evidence": {
+    "kind": "mep.failure.v3",
+    "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+    "provider": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+    "providerAuthority": "Da5z73BSJ1Jhp9NknnMVinkERpSeFJdew39WgjD8HPG3",
+    "deadlineSlot": 510493531,
+    "observedSlot": 510493535,
+    "resultRoot": "sha256:89cbb8089841a63d5f758c86e66e0f2b1f2f3b82fcc958147a850e90ec20054a",
+    "result": {
+      "kind": "mep.result.v1",
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "taskOutput": "{\"schema\":\"mep.evidence-summary.v1\",\"invoice\":{\"id\":\"INV-1042\",\"total\":\"418.00\"},\"exhibits\":[{\"id\":\"E-3\",\"finding\":\"Transit damage.\"}],\"toolCalls\":[{\"tool\":\"sum_invoice\",\"arguments\":{\"invoice_id\":\"INV-1042\"}}],\"summary\":\"Invoice INV-1042 totals 418.00. Liability terms not found.\"}",
+      "canaryOutputs": {
+        "date-extraction": "{\"due_date\":\"2026-09-31\"}",
+        "clause-count": "The agreement contains 9 numbered clauses.",
+        "currency-code": "USD"
+      }
+    },
+    "receipt": {
+      "kind": "mep.receipt.v1",
+      "signerRole": "provider",
+      "signer": "Da5z73BSJ1Jhp9NknnMVinkERpSeFJdew39WgjD8HPG3",
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "sequence": 0,
+      "modelInstance": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+      "requestHash": "sha256:eda3f09371190efd79e208a5f204e5ce6dac3cef3dbf9891f4a0eb27cca13a92",
+      "resultRoot": "sha256:89cbb8089841a63d5f758c86e66e0f2b1f2f3b82fcc958147a850e90ec20054a",
+      "startedAt": 1791863003777,
+      "finishedAt": 1791863003777,
+      "tokensIn": 129,
+      "tokensOut": 143,
+      "hardwareClaim": "simulated demo daemon",
+      "signature": "ed25519:d0408a6cb5c0749e9131a765a39f9a52011b526cfc38c77738f9ed36a7a980186e11277681fef7b4a1c77f9ee84893b3c694bb805a90991cdbf082864e20f500"
+    },
+    "taskTerms": {
+      "kind": "evidence-summary",
+      "inputRoot": "sha256:641835d5070491a547639c849edce6cdf68f33e4db434bccb20c4bb7e5a266fc"
+    },
+    "taskInput": {
+      "kind": "mep.task-input.v1",
+      "task": "evidence-summary",
+      "instructions": "Extract the invoice, the liability cap, and every exhibit finding. Call sum_invoice to total the invoice. Reply with a mep.evidence-summary.v1 JSON object. Copy each exhibit finding from its source. Use this summary format: Invoice <id> totals <total> <currency>. Clause <clause> caps liability at <cap> lamports per job. Exhibit <id> shows <source finding>. Repeat the exhibit sentence for every exhibit.",
+      "documents": [
+        {
+          "id": "INV-1042",
+          "kind": "invoice",
+          "text": "Invoice INV-1042\nVendor: Harbor Freight Logistics\nPallet handling 300.00\nInspection 118.20\nTotal due: 418.20 USD"
+        },
+        {
+          "id": "MSA-7",
+          "kind": "agreement",
+          "text": "Master services agreement.\nClause 7. Liability: each party's liability is capped at 5,000,000 lamports per job.\nClause 9. Disputes go to the protocol jury."
+        },
+        {
+          "id": "E-3",
+          "kind": "exhibit",
+          "text": "Exhibit E-3 (photo): a damaged pallet; the shipping label is intact."
+        }
+      ],
+      "tools": [
+        {
+          "name": "sum_invoice",
+          "parameters": {
+            "invoice_id": {
+              "type": "string"
+            },
+            "currency": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "invoice_id",
+            "currency"
+          ]
+        }
+      ]
+    },
+    "policy": {
+      "kind": "mep.verification-policy.v1",
+      "checker": {
+        "name": "mep.task-checker",
+        "version": "1.2.0",
+        "codeRoot": "sha256:ae52d74702adbdeba8f8d52a3e596873063c3eb4651a64f19e781c84edce99d9"
+      },
+      "sampling": {
+        "poolId": "ledger-lite-pool-v1",
+        "poolRoot": "sha256:239f468b07623e4b5f92eab30cc49d929d46c51ba338815b56ae07cda8c1df18",
+        "canaryCount": 3,
+        "draw": "sha256-rank.v1",
+        "seedCommitment": "sha256:343d3e673bf531925fe89601f3374811089200c9f6096a6b29f2238b1cc6fdf7"
+      },
+      "taskChecks": [
+        "output-json",
+        "required-fields",
+        "tool-calls-valid",
+        "fields-in-source",
+        "answers-consistent"
+      ],
+      "weightsBps": {
+        "task": 7000,
+        "canary": 3000
+      },
+      "thresholdBps": 9000
+    },
+    "canaryPool": {
+      "kind": "mep.canary-pool.v1",
+      "id": "ledger-lite-pool-v1",
+      "stockModelId": "stock-model-ledger-lite",
+      "challenges": [
+        {
+          "id": "invoice-tool-call",
+          "prompt": "Call the invoice tool to total invoice INV-1042 in USD.",
+          "referenceOutput": "{\"tool\":\"sum_invoice\",\"arguments\":{\"invoice_id\":\"INV-1042\",\"currency\":\"USD\"}}"
+        },
+        {
+          "id": "refund-tool-call",
+          "prompt": "Call the refund tool for contract C-88: 5,000,000 lamports.",
+          "referenceOutput": "{\"tool\":\"issue_refund\",\"arguments\":{\"contract\":\"C-88\",\"amount\":\"5000000\",\"unit\":\"lamports\"}}"
+        },
+        {
+          "id": "vendor-tool-call",
+          "prompt": "Look up the vendor named on invoice INV-1042.",
+          "referenceOutput": "{\"tool\":\"lookup_vendor\",\"arguments\":{\"name\":\"Harbor Freight Logistics\"}}"
+        },
+        {
+          "id": "date-extraction",
+          "prompt": "Return the due date in 'Net 30 from 2026-09-01' as JSON.",
+          "referenceOutput": "{\"due_date\":\"2026-10-01\"}"
+        },
+        {
+          "id": "liability-clause",
+          "prompt": "Quote the liability cap in clause 7 of the attached agreement.",
+          "referenceOutput": "Clause 7 caps liability at 5,000,000 lamports per job."
+        },
+        {
+          "id": "long-context-recall",
+          "prompt": "Which page of the 8,000-token bundle lists the delivery address?",
+          "referenceOutput": "Page 31 lists the delivery address."
+        },
+        {
+          "id": "clause-count",
+          "prompt": "How many numbered clauses does the agreement contain?",
+          "referenceOutput": "The agreement contains 12 numbered clauses."
+        },
+        {
+          "id": "currency-code",
+          "prompt": "Give the ISO 4217 code for the invoice currency.",
+          "referenceOutput": "USD"
+        }
+      ]
+    },
+    "canarySeed": "d08c002378a872db26fe18f459d43679a9879c159c5441a5757aac4420a24a40",
+    "verification": {
+      "kind": "mep.verification.v1",
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "policyRoot": "sha256:66336d26e046aefe0ebbab6640e400eca76ebb749bfc2f523e7f44706104e040",
+      "checker": {
+        "name": "mep.task-checker",
+        "version": "1.2.0",
+        "codeRoot": "sha256:ae52d74702adbdeba8f8d52a3e596873063c3eb4651a64f19e781c84edce99d9"
+      },
+      "drawnCanaries": [
+        "date-extraction",
+        "clause-count",
+        "currency-code"
+      ],
+      "taskChecks": [
+        {
+          "id": "output-json",
+          "passed": true,
+          "detail": "Output is a mep.evidence-summary.v1 JSON object"
+        },
+        {
+          "id": "required-fields",
+          "passed": false,
+          "detail": "Missing: invoice.currency, liability.clause, liability.capLamports"
+        },
+        {
+          "id": "tool-calls-valid",
+          "passed": false,
+          "detail": "sum_invoice: missing currency"
+        },
+        {
+          "id": "fields-in-source",
+          "passed": false,
+          "detail": "Not found in the task input: invoice.total, invoice.currency, liability.clause, liability.capLamports, exhibit E-3 finding"
+        },
+        {
+          "id": "answers-consistent",
+          "passed": false,
+          "detail": "summary must state the source invoice, liability terms, and exhibit findings without additional claims"
+        }
+      ],
+      "canaries": [
+        {
+          "challengeId": "date-extraction",
+          "method": "json-fields",
+          "expectedOutputRoot": "sha256:3e85966e71698f3565d01aaa6992dc8a73a1b09df67c218388f98b30c891b47b",
+          "observedOutputRoot": "sha256:bcf65c55c3fed4e5c6c3ae4f64336b695be716b04ebe6137fa61bb763923e0d5",
+          "scoreBps": 0
+        },
+        {
+          "challengeId": "clause-count",
+          "method": "normalized-text",
+          "expectedOutputRoot": "sha256:dc9ecac7e48785b47b7ea4b314bb26072bfbff176417d0a5b6990f96ab060ebe",
+          "observedOutputRoot": "sha256:b338c12d29ff4145418c5f8e72554c1794b9af4241f7b88061a0bd272f2c13d6",
+          "scoreBps": 0
+        },
+        {
+          "challengeId": "currency-code",
+          "method": "normalized-text",
+          "expectedOutputRoot": "sha256:a26cdf3a6e709124385d4d7eb9bff6b897a58ed5597fbab779b89849dbe81b21",
+          "observedOutputRoot": "sha256:a26cdf3a6e709124385d4d7eb9bff6b897a58ed5597fbab779b89849dbe81b21",
+          "scoreBps": 10000
+        }
+      ],
+      "taskScoreBps": 2000,
+      "canaryScoreBps": 3333,
+      "scoreBps": 2399,
+      "thresholdBps": 9000,
+      "passed": false
+    },
+    "reason": "verification-policy-failed"
+  },
+  "evidenceRoot": "sha256:5b42059465fd2239b15be6ded18fe8bbf748ae243cee42692d4e7fa60bd39ad8",
+  "memory": {
+    "kind": "mep.memory.v2",
+    "agent": "5Td1CJgaBN2hk9Kf6KJG2RcVoC6ibxzoWpNMsgxZrAh1",
+    "checkpoint": 1,
+    "previousRoot": "sha256:de9acb3e09f32dbbd3405023f7743dff9aefef8646752972d4998f4131a04543",
+    "failureProbabilityOverridesBps": {
+      "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7": 2500
+    },
+    "precedents": [
+      {
+        "account": "6cCEgRiWWqoJWB21gQ6tmCBQzY6vP2x9v4MNQExjJrRL",
+        "rulingRoot": "sha256:075f0aec0aea4e954d507e1aab15513550a4ef3337ce6e07b214c3ee160215e1",
+        "provider": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+        "relation": "party"
+      }
+    ]
+  },
+  "twinMemory": {
+    "kind": "mep.memory.v2",
+    "agent": "87Cvk1ccfgopdeMuERiHWLQSujpyUAuMGeEhPNewrXvt",
+    "checkpoint": 1,
+    "previousRoot": "sha256:0890dcd13432983b90fe2f780f3316f3a2c50cf4997a3a88e04f0abc7b1900c7",
+    "failureProbabilityOverridesBps": {
+      "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7": 2500
+    },
+    "precedents": [
+      {
+        "account": "6cCEgRiWWqoJWB21gQ6tmCBQzY6vP2x9v4MNQExjJrRL",
+        "rulingRoot": "sha256:075f0aec0aea4e954d507e1aab15513550a4ef3337ce6e07b214c3ee160215e1",
+        "provider": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+        "relation": "observer"
+      }
+    ]
+  },
+  "ruling": {
+    "provider": "Provider X",
+    "outcome": "provider-breached",
+    "recipient": "customer",
+    "amountLamports": 5000000,
+    "breachVotes": 4,
+    "reveals": 5
+  },
+  "rulingRoot": "sha256:075f0aec0aea4e954d507e1aab15513550a4ef3337ce6e07b214c3ee160215e1",
+  "precedent": {
+    "account": "6cCEgRiWWqoJWB21gQ6tmCBQzY6vP2x9v4MNQExjJrRL",
+    "rulingRoot": "sha256:075f0aec0aea4e954d507e1aab15513550a4ef3337ce6e07b214c3ee160215e1",
+    "dispute": "A9BqESHrapSBSo5apFn8sykveJ18fRWky54c44HsFYox",
+    "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+    "customerAgent": "5Td1CJgaBN2hk9Kf6KJG2RcVoC6ibxzoWpNMsgxZrAh1",
+    "provider": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+    "providerBreached": true,
+    "breachVotes": 4,
+    "reveals": 5,
+    "url": "https://explorer.solana.com/address/6cCEgRiWWqoJWB21gQ6tmCBQzY6vP2x9v4MNQExjJrRL?cluster=devnet"
+  },
+  "pnl": {
+    "lines": [
+      {
+        "label": "OCR subcontract",
+        "lamports": "-3000000",
+        "kind": "cost"
+      },
+      {
+        "label": "Job 1 · Provider X",
+        "lamports": "-5000000",
+        "kind": "cost"
+      },
+      {
+        "label": "Job 1 · Provider X · escrow refund",
+        "lamports": "5000000",
+        "kind": "refund"
+      }
+    ],
+    "totalLamports": "-3000000",
+    "refundedLamports": "5000000",
+    "withoutRefundsLamports": "-8000000"
+  },
+  "agent": {
+    "address": "5Td1CJgaBN2hk9Kf6KJG2RcVoC6ibxzoWpNMsgxZrAh1",
+    "url": "https://explorer.solana.com/address/5Td1CJgaBN2hk9Kf6KJG2RcVoC6ibxzoWpNMsgxZrAh1?cluster=devnet",
+    "twin": "87Cvk1ccfgopdeMuERiHWLQSujpyUAuMGeEhPNewrXvt",
+    "twinUrl": "https://explorer.solana.com/address/87Cvk1ccfgopdeMuERiHWLQSujpyUAuMGeEhPNewrXvt?cluster=devnet",
+    "twinMemoryRoot": "sha256:251a7e01e4a5725db3c78806994f5867263454d253463283856982c8b7917b4c",
+    "twinInitialMemoryRoot": "sha256:0890dcd13432983b90fe2f780f3316f3a2c50cf4997a3a88e04f0abc7b1900c7",
+    "twinCheckpoints": 1,
+    "genesisRoot": "sha256:c89ece392201902b2fb819bcb9d03f0f036cca56a25c5e0c58d6af7c816c7acc",
+    "initialMemoryRoot": "sha256:de9acb3e09f32dbbd3405023f7743dff9aefef8646752972d4998f4131a04543",
+    "memoryRoot": "sha256:5dafea46b3f2251f442925bad25bb168b0f8db3964b3546a240a6955330fd164",
+    "checkpoints": 1
+  },
+  "links": {
+    "program": "https://explorer.solana.com/address/2jRt4n86GVHaW7Ebm1eoKYUBdqyrs3Zie3rwQnvA23uE?cluster=devnet",
+    "dispute": "https://explorer.solana.com/address/A9BqESHrapSBSo5apFn8sykveJ18fRWky54c44HsFYox?cluster=devnet"
+  },
+  "geminiConfigured": true,
+  "busy": false,
+  "error": null,
+  "evidenceBundle": "evidence-bundle.json"
+}

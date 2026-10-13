@@ -1,0 +1,271 @@
+{
+  "kind": "mep.evidence-bundle.v1",
+  "cluster": "devnet",
+  "programId": "2jRt4n86GVHaW7Ebm1eoKYUBdqyrs3Zie3rwQnvA23uE",
+  "precedent": "6cCEgRiWWqoJWB21gQ6tmCBQzY6vP2x9v4MNQExjJrRL",
+  "evidence": {
+    "kind": "mep.failure.v3",
+    "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+    "provider": "CkPgSCx32vYewt75KhrMHngBQvPAmBsChdef4kkJMdk7",
+    "providerAuthority": "Da5z73BSJ1Jhp9NknnMVinkERpSeFJdew39WgjD8HPG3",
+    "deadlineSlot": 510493531,
+    "observedSlot": 510493535,
+    "resultRoot": "sha256:89cbb8089841a63d5f758c86e66e0f2b1f2f3b82fcc958147a850e90ec20054a",
+    "result": {
+      "kind": "mep.result.v1",
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "taskOutput": "{\"schema\":\"mep.evidence-summary.v1\",\"invoice\":{\"id\":\"INV-1042\",\"total\":\"418.00\"},\"exhibits\":[{\"id\":\"E-3\",\"finding\":\"Transit damage.\"}],\"toolCalls\":[{\"tool\":\"sum_invoice\",\"arguments\":{\"invoice_id\":\"INV-1042\"}}],\"summary\":\"Invoice INV-1042 totals 418.00. Liability terms not found.\"}",
+      "canaryOutputs": {
+        "date-extraction": "{\"due_date\":\"2026-09-31\"}",
+        "clause-count": "The agreement contains 9 numbered clauses.",
+        "currency-code": "USD"
+      }
+    },
+    "receipt": {
+      "kind": "mep.receipt.v1",
+      "signerRole": "provider",
+      "signer": "Da5z73BSJ1Jhp9NknnMVinkERpSeFJdew39WgjD8HPG3",
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "sequence": 0,
+      "modelInstance": "8RQWTxixRcHVJFEQTNDa4SmJgNcVqnffvSZJVBi8VuRR",
+      "requestHash": "sha256:eda3f09371190efd79e208a5f204e5ce6dac3cef3dbf9891f4a0eb27cca13a92",
+      "resultRoot": "sha256:89cbb8089841a63d5f758c86e66e0f2b1f2f3b82fcc958147a850e90ec20054a",
+      "startedAt": 1791863003777,
+      "finishedAt": 1791863003777,
+      "tokensIn": 129,
+      "tokensOut": 143,
+      "hardwareClaim": "simulated demo daemon",
+      "signature": "ed25519:d0408a6cb5c0749e9131a765a39f9a52011b526cfc38c77738f9ed36a7a980186e11277681fef7b4a1c77f9ee84893b3c694bb805a90991cdbf082864e20f500"
+    },
+    "taskTerms": {
+      "kind": "evidence-summary",
+      "inputRoot": "sha256:641835d5070491a547639c849edce6cdf68f33e4db434bccb20c4bb7e5a266fc"
+    },
+    "taskInput": {
+      "kind": "mep.task-input.v1",
+      "task": "evidence-summary",
+      "instructions": "Extract the invoice, the liability cap, and every exhibit finding. Call sum_invoice to total the invoice. Reply with a mep.evidence-summary.v1 JSON object. Copy each exhibit finding from its source. Use this summary format: Invoice <id> totals <total> <currency>. Clause <clause> caps liability at <cap> lamports per job. Exhibit <id> shows <source finding>. Repeat the exhibit sentence for every exhibit.",
+      "documents": [
+        {
+          "id": "INV-1042",
+          "kind": "invoice",
+          "text": "Invoice INV-1042\nVendor: Harbor Freight Logistics\nPallet handling 300.00\nInspection 118.20\nTotal due: 418.20 USD"
+        },
+        {
+          "id": "MSA-7",
+          "kind": "agreement",
+          "text": "Master services agreement.\nClause 7. Liability: each party's liability is capped at 5,000,000 lamports per job.\nClause 9. Disputes go to the protocol jury."
+        },
+        {
+          "id": "E-3",
+          "kind": "exhibit",
+          "text": "Exhibit E-3 (photo): a damaged pallet; the shipping label is intact."
+        }
+      ],
+      "tools": [
+        {
+          "name": "sum_invoice",
+          "parameters": {
+            "invoice_id": {
+              "type": "string"
+            },
+            "currency": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "invoice_id",
+            "currency"
+          ]
+        }
+      ]
+    },
+    "policy": {
+      "kind": "mep.verification-policy.v1",
+      "checker": {
+        "name": "mep.task-checker",
+        "version": "1.2.0",
+        "codeRoot": "sha256:ae52d74702adbdeba8f8d52a3e596873063c3eb4651a64f19e781c84edce99d9"
+      },
+      "sampling": {
+        "poolId": "ledger-lite-pool-v1",
+        "poolRoot": "sha256:239f468b07623e4b5f92eab30cc49d929d46c51ba338815b56ae07cda8c1df18",
+        "canaryCount": 3,
+        "draw": "sha256-rank.v1",
+        "seedCommitment": "sha256:343d3e673bf531925fe89601f3374811089200c9f6096a6b29f2238b1cc6fdf7"
+      },
+      "taskChecks": [
+        "output-json",
+        "required-fields",
+        "tool-calls-valid",
+        "fields-in-source",
+        "answers-consistent"
+      ],
+      "weightsBps": {
+        "task": 7000,
+        "canary": 3000
+      },
+      "thresholdBps": 9000
+    },
+    "canaryPool": {
+      "kind": "mep.canary-pool.v1",
+      "id": "ledger-lite-pool-v1",
+      "stockModelId": "stock-model-ledger-lite",
+      "challenges": [
+        {
+          "id": "invoice-tool-call",
+          "prompt": "Call the invoice tool to total invoice INV-1042 in USD.",
+          "referenceOutput": "{\"tool\":\"sum_invoice\",\"arguments\":{\"invoice_id\":\"INV-1042\",\"currency\":\"USD\"}}"
+        },
+        {
+          "id": "refund-tool-call",
+          "prompt": "Call the refund tool for contract C-88: 5,000,000 lamports.",
+          "referenceOutput": "{\"tool\":\"issue_refund\",\"arguments\":{\"contract\":\"C-88\",\"amount\":\"5000000\",\"unit\":\"lamports\"}}"
+        },
+        {
+          "id": "vendor-tool-call",
+          "prompt": "Look up the vendor named on invoice INV-1042.",
+          "referenceOutput": "{\"tool\":\"lookup_vendor\",\"arguments\":{\"name\":\"Harbor Freight Logistics\"}}"
+        },
+        {
+          "id": "date-extraction",
+          "prompt": "Return the due date in 'Net 30 from 2026-09-01' as JSON.",
+          "referenceOutput": "{\"due_date\":\"2026-10-01\"}"
+        },
+        {
+          "id": "liability-clause",
+          "prompt": "Quote the liability cap in clause 7 of the attached agreement.",
+          "referenceOutput": "Clause 7 caps liability at 5,000,000 lamports per job."
+        },
+        {
+          "id": "long-context-recall",
+          "prompt": "Which page of the 8,000-token bundle lists the delivery address?",
+          "referenceOutput": "Page 31 lists the delivery address."
+        },
+        {
+          "id": "clause-count",
+          "prompt": "How many numbered clauses does the agreement contain?",
+          "referenceOutput": "The agreement contains 12 numbered clauses."
+        },
+        {
+          "id": "currency-code",
+          "prompt": "Give the ISO 4217 code for the invoice currency.",
+          "referenceOutput": "USD"
+        }
+      ]
+    },
+    "canarySeed": "d08c002378a872db26fe18f459d43679a9879c159c5441a5757aac4420a24a40",
+    "verification": {
+      "kind": "mep.verification.v1",
+      "contract": "J1dQPiNjXoYssourjZUM6KhYEUM2R9wngHtz7TbZ62ys",
+      "policyRoot": "sha256:66336d26e046aefe0ebbab6640e400eca76ebb749bfc2f523e7f44706104e040",
+      "checker": {
+        "name": "mep.task-checker",
+        "version": "1.2.0",
+        "codeRoot": "sha256:ae52d74702adbdeba8f8d52a3e596873063c3eb4651a64f19e781c84edce99d9"
+      },
+      "drawnCanaries": [
+        "date-extraction",
+        "clause-count",
+        "currency-code"
+      ],
+      "taskChecks": [
+        {
+          "id": "output-json",
+          "passed": true,
+          "detail": "Output is a mep.evidence-summary.v1 JSON object"
+        },
+        {
+          "id": "required-fields",
+          "passed": false,
+          "detail": "Missing: invoice.currency, liability.clause, liability.capLamports"
+        },
+        {
+          "id": "tool-calls-valid",
+          "passed": false,
+          "detail": "sum_invoice: missing currency"
+        },
+        {
+          "id": "fields-in-source",
+          "passed": false,
+          "detail": "Not found in the task input: invoice.total, invoice.currency, liability.clause, liability.capLamports, exhibit E-3 finding"
+        },
+        {
+          "id": "answers-consistent",
+          "passed": false,
+          "detail": "summary must state the source invoice, liability terms, and exhibit findings without additional claims"
+        }
+      ],
+      "canaries": [
+        {
+          "challengeId": "date-extraction",
+          "method": "json-fields",
+          "expectedOutputRoot": "sha256:3e85966e71698f3565d01aaa6992dc8a73a1b09df67c218388f98b30c891b47b",
+          "observedOutputRoot": "sha256:bcf65c55c3fed4e5c6c3ae4f64336b695be716b04ebe6137fa61bb763923e0d5",
+          "scoreBps": 0
+        },
+        {
+          "challengeId": "clause-count",
+          "method": "normalized-text",
+          "expectedOutputRoot": "sha256:dc9ecac7e48785b47b7ea4b314bb26072bfbff176417d0a5b6990f96ab060ebe",
+          "observedOutputRoot": "sha256:b338c12d29ff4145418c5f8e72554c1794b9af4241f7b88061a0bd272f2c13d6",
+          "scoreBps": 0
+        },
+        {
+          "challengeId": "currency-code",
+          "method": "normalized-text",
+          "expectedOutputRoot": "sha256:a26cdf3a6e709124385d4d7eb9bff6b897a58ed5597fbab779b89849dbe81b21",
+          "observedOutputRoot": "sha256:a26cdf3a6e709124385d4d7eb9bff6b897a58ed5597fbab779b89849dbe81b21",
+          "scoreBps": 10000
+        }
+      ],
+      "taskScoreBps": 2000,
+      "canaryScoreBps": 3333,
+      "scoreBps": 2399,
+      "thresholdBps": 9000,
+      "passed": false
+    },
+    "reason": "verification-policy-failed"
+  },
+  "stockModels": [
+    {
+      "kind": "mep.stock-model.v1",
+      "id": "stock-model-ledger-lite",
+      "displayName": "Ledger Lite Analyst",
+      "modelFamily": "ledger-lite",
+      "version": 1,
+      "artifact": {
+        "format": "stub",
+        "hash": "sha256:0f6d4f9b6a9e5b25b8f1bf0d3ee80b1f7c2b95c0d13f6b6873b48d9ed2c4a501",
+        "parameterCount": "demo-stub",
+        "contextWindowTokens": 8192
+      },
+      "capabilities": [
+        "invoice-reasoning",
+        "evidence-summary",
+        "contract-drafting"
+      ],
+      "license": "demo-fixture"
+    },
+    {
+      "kind": "mep.stock-model.v1",
+      "id": "stock-model-vision-ocr",
+      "displayName": "Vision OCR Specialist",
+      "modelFamily": "vision-ocr",
+      "version": 1,
+      "artifact": {
+        "format": "stub",
+        "hash": "sha256:8fb2bdb7b0e91781794e631f2f2a44a63dd2e65a5027952815c27f4a73d29d41",
+        "parameterCount": "demo-stub",
+        "contextWindowTokens": 4096
+      },
+      "capabilities": [
+        "ocr",
+        "receipt-extraction",
+        "image-evidence",
+        "evidence-summary"
+      ],
+      "license": "demo-fixture"
+    }
+  ]
+}
