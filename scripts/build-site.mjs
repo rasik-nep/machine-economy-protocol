@@ -31,7 +31,11 @@ for (const file of await readdir(REPLAY))
 // recorded snapshots instead of the live demo API.
 const shell = await readFile("apps/web/public/index.html", "utf8");
 if (!shell.includes('<html lang="en">')) throw new Error("index.html shell has changed.");
-const html = shell.replace('<html lang="en">', '<html lang="en" data-mode="replay">');
+if (!shell.includes('id="static-banner" hidden')) throw new Error("Static banner is missing.");
+// Replay mode also reveals the banner that says this site is a static recording.
+const html = shell
+  .replace('<html lang="en">', '<html lang="en" data-mode="replay">')
+  .replace('id="static-banner" hidden', 'id="static-banner"');
 // One file per route, so /demo serves demo.html (Vercel cleanUrls) and a reload works.
 for (const { path } of Object.values(pages))
   await writeFile(`${OUT}/${path === "/" ? "index" : path.slice(1)}.html`, html);

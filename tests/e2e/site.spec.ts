@@ -72,11 +72,11 @@ test("navigation history, glossary search, and reference state survive polling",
   const poll = page.waitForResponse("**/api/state");
   await poll;
   await expect(page.getByLabel("Find a concept")).toHaveValue("passport");
-  await expect(page.locator('[data-detail="faq-0"]')).toHaveAttribute("open", "");
+  await expect(page.locator('[data-detail="faq-1"]')).toHaveAttribute("open", "");
   await page.getByLabel("Find a concept").fill("no-matching-concept");
   await expect(page.getByText("No matching concepts.", { exact: false })).toBeVisible();
   await page.getByLabel("Find a concept").fill("");
-  await expect(page.locator(".glossary-entry:visible")).toHaveCount(11);
+  await expect(page.locator(".glossary-entry:visible")).toHaveCount(16);
 });
 
 test("educational pages work without localnet and the explorer recovers", async ({ page }) => {

@@ -317,7 +317,7 @@ function render() {
       : (state.busy || requesting) && !replay
         ? `<div class="notice"><span class="spinner"></span>${escape(state.stageLabel)} · Confirming ${escape(state.network)} transactions. Jury phases wait for their on-chain slot deadlines.</div>`
         : replay
-          ? `<div class="notice">Replay of a real ${escape(network(state))} run · stage ${state.stage + 1} of ${state.stages.length}. Every account and signature is on-chain: open any Explorer link to verify it. ${explorer(state.links.program, "Program on Explorer ↗")}</div>`
+          ? `<div class="notice">Static replay of a real ${escape(network(state))} run · stage ${state.stage + 1} of ${state.stages.length}. The controls step through recorded snapshots and send no transactions. Every account and signature is on-chain: open any Explorer link to verify it. ${explorer(state.links.program, "Program on Explorer ↗")}</div>`
           : "";
   content.innerHTML =
     view === "market"
